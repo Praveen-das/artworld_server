@@ -1,0 +1,16 @@
+product----------->
+    add*
+    remove*
+    delete*
+    update*
+
+    sort------->
+        popular///////////
+        price-low to high,high to low
+        recently added
+
+    filter----->
+        price range
+        category
+        artist
+        medium
