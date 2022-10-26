@@ -7,25 +7,37 @@ interface sortInterface {
 }
 
 interface Product_Item {
-  product: {
-    name: string;
-    description: string;
-    material_id: number;
-    category_id: number;
-  };
-  item: {
-    price: number;
-    size: number;
-    quantity: number;
-    images: string[];
-    tags: string[];
-  };
+  name: string;
+  description: string;
+  material_id: number;
+  category_id: number;
+  price: number;
+  size: number;
+  quantity: number;
+  images: string[];
+  tags: string[];
   price_range: any;
 }
 
+const select = {
+  name: true,
+  desc: true,
+  material: true,
+  category: true,
+  size: true,
+  quantity: true,
+  price: true,
+  discount: true,
+  images: true,
+  reviews: true,
+  createdAt: true,
+  seles_person: true,
+  id: true,
+};
+
 const _fetchProducts = async (
   sort: sortInterface,
-  { price_range = {}, ...product }: Product_Item, ////destructure price range from facets and assign rest to product
+  { price_range = {}, ...product }: any, ////destructure price range from facets and assign rest to product
   page: number,
   limit: number
 ) => {
@@ -36,11 +48,9 @@ const _fetchProducts = async (
   const data = await db.product.findMany({
     where: {
       ...product,
-      item: {
-        price: { ...price_range },
-      },
+      price: { ...price_range },
     },
-    include: { item: true, material: true, category: true },
+    select,
     skip: (page - 1) * limit,
     take: limit,
     orderBy: { [sort.item]: sort.method },
@@ -51,26 +61,15 @@ const _fetchProducts = async (
 const _fetchProductById = async (id: string) => {
   const res = await db.product.findUnique({
     where: { id },
-    include: {
-      item: true,
-    },
+    select,
   });
   return res;
 };
 
-const _addProduct = async ({ product, item }: Product_Item) => {
+const _addProduct = async (product: any) => {
   const res = await db.product.create({
-    data: {
-      ...product,
-      item: {
-        create: item,
-      },
-    },
-    include: {
-      item: true,
-      material: true,
-      category: true,
-    },
+    data: product,
+    select,
   });
   return res;
 };
@@ -80,33 +79,24 @@ const _removeProduct = async (id: string) => {
   return res;
 };
 
-const _updateProduct = async (id: string, { product, item }: Product_Item) => {
+const _updateProduct = async (id: string, product: any) => {
   const res = await db.product.update({
     where: { id },
     data: {
       ...product,
-      item: {
-        update: item,
-      },
     },
-    include: {
-      item: true,
-    },
+    select,
   });
   return res;
 };
 
 const _searchProduct = async (query: any) => {
-  const data = await db.item.findMany({
+  const data = await db.product.findMany({
     orderBy: query.sort.item === "price" ? { price: "asc" } : { price: "desc" },
     where: {
-      product: {
-        name: query.name,
-      },
+      name: query.name,
     },
-    include: {
-      product: true,
-    },
+    select,
     take: 20,
   });
   return data;

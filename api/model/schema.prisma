@@ -26,34 +26,43 @@ model User {
 }
 
 model Address {
-  flat     String  @db.VarChar(60)
-  company  String? @db.VarChar(60)
-  street   String  @db.VarChar(60)
-  city     String  @db.VarChar(40)
-  state    String  @db.Char(2)
-  zip_code Int
-  phone    String  @db.VarChar(20)
-  id       String  @id @default(uuid())
+  address_line1 String  @db.VarChar(60)
+  address_line2 String? @db.VarChar(60)
+  city          String  @db.VarChar(40)
+  state         String  @db.VarChar(20)
+  country       String  @db.VarChar(20)
+  postal_code   Int
+  telephone     String  @db.VarChar(20)
+  mobile        String  @db.VarChar(20)
+  id            String  @id @default(uuid())
 
   user_id String
   user    User   @relation(fields: [user_id], references: [id])
-
-  @@unique([flat, company, street, user_id])
 }
 
 model Product {
-  name        String @db.VarChar(50)
-  description String
-  id          String @id @default(uuid())
+  name       String   @db.VarChar(50)
+  desc       String
+  size       String
+  quantity   Int
+  price      Int
+  discount   Int
+  images     Json[]
+  createdAt  DateTime @default(now())
+  modifiedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
 
-  category        Category? @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  category        Category?  @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   category_id     Int?
-  material        Material? @relation(fields: [material_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  material        Material?  @relation(fields: [material_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   material_id     Int?
-  seles_person    User?     @relation(fields: [seles_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_selles_person_id_fkey")
+  seles_person    User?      @relation(fields: [seles_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_selles_person_id_fkey")
   seles_person_id String?
-  item            Item?
   reviews         Reviews[]
+  cart_item       cart_item? @relation(fields: [cart_itemId], references: [id])
+  cart_itemId     Int?
+
+  @@unique([name, desc])
 }
 
 model Category {
@@ -82,29 +91,14 @@ model Reviews {
   @@unique([user_id, product_id])
 }
 
-model Item {
-  size      Int
-  price     Int
-  quantity  Int
-  images    String[]
-  tags      String[]
-  createdAt DateTime @default(now())
-  id        String   @id @default(uuid())
+model cart_item {
+  quantity Int
+  discount Int @default(0)
+  id       Int @id @default(autoincrement())
 
-  product    Product?     @relation(fields: [product_id], references: [id])
-  product_id String?      @unique
-  sales_item sales_item[]
-}
-
-model sales_item {
-  item_id        String?
+  product        Product[]
+  sales_order    sales_order? @relation(fields: [seles_order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   seles_order_id String?
-  quantity       Int
-  discount       Int     @default(0)
-  id             Int     @id @default(autoincrement())
-
-  item        Item?        @relation(fields: [item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sales_order sales_order? @relation(fields: [seles_order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model sales_order {
@@ -114,11 +108,11 @@ model sales_order {
   status            status_type? @default(pending)
   id                String       @id @default(uuid())
 
-  person_personTosales_order_customer_id User?        @relation("personTosales_order_customer_id", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  person_personTosales_order_customer_id User?       @relation("personTosales_order_customer_id", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   customer_id                            String?
-  person_personTosales_order_seller_id   User?        @relation("personTosales_order_seller_id", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  person_personTosales_order_seller_id   User?       @relation("personTosales_order_seller_id", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   seller_id                              String?
-  sales_item                             sales_item[]
+  cart_item                              cart_item[]
 }
 
 enum sex_type {
