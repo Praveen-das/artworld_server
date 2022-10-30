@@ -15,6 +15,7 @@ const fetchProducts = (req: any, res: any, next: any) => {
   let {
     sort = SORT_DEFAULTS,
     facets = {},
+    q = null,
     page = DEFAULT_PAGE,
     limit = DEFAULT_LIMIT,
   } = req.query;
@@ -25,7 +26,7 @@ const fetchProducts = (req: any, res: any, next: any) => {
   limit = parseInt(limit);
   page = parseInt(page);
 
-  _fetchProducts(sortingConstraints, facets, page, limit)
+  _fetchProducts(sortingConstraints, facets, q, page, limit)
     .then((data) => res.status(200).send(data))
     .catch(next);
 };

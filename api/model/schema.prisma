@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -49,7 +50,7 @@ model Product {
   discount   Int
   images     Json[]
   createdAt  DateTime @default(now())
-  modifiedAt DateTime @updatedAt
+  // modifiedAt DateTime @updatedAt
   id         String   @id @default(uuid())
 
   category        Category?  @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)

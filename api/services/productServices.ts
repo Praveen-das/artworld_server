@@ -35,25 +35,10 @@ const select = {
   id: true,
 };
 
-const group: any = [
-  "name",
-  "desc",
-  "material_id",
-  "category_id",
-  "size",
-  "quantity",
-  "price",
-  "discount",
-  "images",
-  // "reviews",
-  "createdAt",
-  // "seles_person",
-  "id",
-];
-
 const _fetchProducts = async (
   sort: sortInterface,
   { price_range = {}, ...product }: any, ////destructure price range from facets and assign rest to product
+  q: any,
   page: number,
   limit: number
 ) => {
@@ -65,6 +50,7 @@ const _fetchProducts = async (
     db.product.findMany({
       where: {
         ...product,
+        ...q,
         price: { ...price_range },
       },
       select,
@@ -72,7 +58,10 @@ const _fetchProducts = async (
       take: limit,
       orderBy: { [sort.item]: sort.method },
     }),
-    db.product.count({ select: { id: true } }),
+    db.product.count({
+      select: { id: true },
+      where: { ...product, ...q, price: { ...price_range } },
+    }),
   ]);
 
   return data;
