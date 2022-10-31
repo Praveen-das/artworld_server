@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch"]
 }
 
@@ -42,16 +42,18 @@ model Address {
 }
 
 model Product {
-  name       String   @db.VarChar(50)
-  desc       String
-  size       String
-  quantity   Int
-  price      Int
-  discount   Int
-  images     Json[]
-  createdAt  DateTime @default(now())
-  // modifiedAt DateTime @updatedAt
-  id         String   @id @default(uuid())
+  name         String   @db.VarChar(50)
+  desc         String
+  width        Int
+  height       Int
+  quantity     Int
+  price        Int
+  discount     Int
+  images       Json[]
+  defaultImage String
+  createdAt    DateTime @default(now())
+  modifiedAt   DateTime @updatedAt
+  id           String   @id @default(uuid())
 
   category        Category?  @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   category_id     Int?

@@ -12,7 +12,8 @@ interface Product_Item {
   material_id: number;
   category_id: number;
   price: number;
-  size: number;
+  width: number;
+  height: number;
   quantity: number;
   images: string[];
   tags: string[];
@@ -24,7 +25,8 @@ const select = {
   desc: true,
   material: true,
   category: true,
-  size: true,
+  width: true,
+  height: true,
   quantity: true,
   price: true,
   discount: true,
@@ -88,13 +90,11 @@ const _removeProduct = async (id: string) => {
   return res;
 };
 
-const _updateProduct = async (id: string, product: any) => {
+const _updateProduct = async (id: string, updates: any) => {
   const res = await db.product.update({
     where: { id },
-    data: {
-      ...product,
-    },
-    select,
+    data: updates,
+    // select,
   });
   return res;
 };
