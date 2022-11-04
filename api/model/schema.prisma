@@ -16,8 +16,8 @@ model User {
   last_name   String  @db.VarChar(20)
   username    String  @unique @db.VarChar(30)
   email       String  @db.VarChar(60)
-  seller      Boolean @default(false)
-  id          String  @id @default(uuid())
+  password    String  
+  id          String  @unique @id @default(uuid())
 
   address                                     Address[]
   product                                     Product[]

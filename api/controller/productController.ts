@@ -15,18 +15,31 @@ const fetchProducts = (req: any, res: any, next: any) => {
   let {
     sort = SORT_DEFAULTS,
     facets = {},
-    q = null,
+    query,
     page = DEFAULT_PAGE,
     limit = DEFAULT_LIMIT,
   } = req.query;
 
+  let search
+  
+  if (query) {
+    search = {
+      name: {
+        search: query
+      },
+      id: {
+        search: query
+      },
+    }
+  }
+  
   const [item, method] = sort?.split("_");
   const sortingConstraints = { item, method };
 
   limit = parseInt(limit);
   page = parseInt(page);
 
-  _fetchProducts(sortingConstraints, facets, q, page, limit)
+  _fetchProducts(sortingConstraints, facets, search, page, limit)
     .then((data) => res.status(200).send(data))
     .catch(next);
 };
