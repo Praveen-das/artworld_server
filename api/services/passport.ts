@@ -8,12 +8,25 @@ const initializePassport = (passport: any) => {
       const user: any = await getUserByUsername(username);
       try {
         if (!user)
-          return done({ message: "User doesn't exist ", code: 401 }, false);
+          return done(
+            {
+              error: { field: "username", message: "User doesn't exist " },
+              code: 401,
+            },
+            false
+          );
 
         if (await bcrypt.compare(password, user.password)) {
           delete user.password;
           return done(null, user);
-        } else done({ message: "Check your password", code: 401 }, false);
+        } else
+          done(
+            {
+              error: { field: "password", message: "Incorrect password" },
+              code: 401,
+            },
+            false
+          );
       } catch (error) {
         done(error);
       }

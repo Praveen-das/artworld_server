@@ -20,5 +20,12 @@ const getUserById = async (id: string) => {
   });
   return data;
 };
+const _updateUser = async (id: string, updates: any) => {
+  const data = await db.user.update({
+    where: { id },
+    data: updates,
+  });
+  return data;
+};
 
-export { _signupUser, getUserByUsername, getUserById };
+export { _signupUser, getUserByUsername, getUserById, _updateUser };
