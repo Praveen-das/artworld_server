@@ -2,6 +2,7 @@ import express from "express";
 import controller from "../controller/productController";
 
 const router = express.Router();
+
 const {
   fetchProducts,
   fetchProductById,
