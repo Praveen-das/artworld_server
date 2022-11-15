@@ -5,15 +5,23 @@ import { _updateUser } from "./userServices";
 const SECRET = "asdasdasdasdasd";
 
 const generateToken = (payload: any) => {
-  return jwt.sign(payload, SECRET, { expiresIn: "5m", algorithm: "HS256" });
+  return jwt.sign(payload, SECRET, { expiresIn: "15m", algorithm: "HS256" });
 };
 
-const verifyToken = (token: string) => {
-  jwt.verify(token, SECRET, { algorithms: ["HS256"] }, (err, decoded: any) => {
-    if (err) throw err;
-    if (decoded) {
-      _updateUser(decoded.user_id, decoded.data);
-    }
+const verifyToken = async (token: string) => {
+  return await new Promise((res, rej) => {
+    jwt.verify(
+      token,
+      SECRET,
+      { algorithms: ["HS256"] },
+      (err, decoded: any) => {
+        if (err) rej(err);
+        if (decoded) {
+          res(decoded);
+          // _updateUser(decoded.user_id, decoded.data);
+        }
+      }
+    );
   });
 };
 

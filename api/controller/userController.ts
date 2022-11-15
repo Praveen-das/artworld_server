@@ -3,24 +3,25 @@ import bcrypt from "bcrypt";
 import passport from "passport";
 import { sendMail } from "../services/nodeMailer";
 import { generateToken, verifyToken } from "../services/jwt";
+import { prismaErrorHandler } from "../utils/PrismaErrorHandler";
+
+const hashPassword = async (password: string) => {
+  const salt = 12;
+  return await bcrypt.hash(password, salt);
+};
 
 const signupUser = async (req: any, res: any, next: any) => {
   const credentials = req.body;
-  const salt = 12;
 
-  const hashPass = await bcrypt.hash(req.body.password, salt);
+  const hashPass = await hashPassword(req.body.password);
 
   credentials.password = hashPass;
 
   _signupUser(credentials)
     .then((data) => res.json(data))
     .catch((err) => {
-      if (err.code === "P2002") {
-        next({
-          error: { field: "username", message: "User alredy exists" },
-          code: 403,
-        });
-      } else next(err);
+      prismaErrorHandler(err, next);
+      next(err);
     });
 };
 
@@ -41,14 +42,31 @@ const logoutUser = (req: any, res: any, next: any) => {
   });
 };
 
-const updateUser = (req: any, res: any, next: any) => {
-  try {
-    _updateUser(req.user.id, req.body)
-      .then((data) => res.status(200).json(data))
-      .catch(next);
-  } catch (error) {
-    console.log(error);
+const updateUser = async (req: any, res: any, next: any) => {
+  let updates = req.body;
+
+  if (updates.old_password) {
+    const isValid = await bcrypt.compare(
+      updates.old_password,
+      req.user.password
+    );
+
+    if (isValid) {
+      delete updates.old_password;
+      updates.password = await hashPassword(updates.password);
+    } else {
+      return next({
+        error: { field: "old_password", message: "Invalid password" },
+        code: 401,
+      });
+    }
   }
+
+  _updateUser(req.user.id, updates)
+    .then((data) => res.status(200).json(data))
+    .catch((err) => {
+      prismaErrorHandler(err, next);
+    });
 };
 
 const sendEmailVerification = async (req: any, res: any, next: any) => {
@@ -57,20 +75,23 @@ const sendEmailVerification = async (req: any, res: any, next: any) => {
   const payload = req.body;
 
   const token = generateToken({ ...payload, user_id: req.user.id });
-  console.log(token);
 
   // await setUserVerificationRecord(user_id, token);
-  // // sendMail(token, email).then(() => {
-  // // });
+  sendMail(token);
 };
 
 const confirmVerification = async (req: any, res: any, next: any) => {
   try {
-    verifyToken(req.query.token);
-  } catch (error: any) {
-    return res.status(410).send(error.message);
+    const isVerified = await verifyToken(req.query.token);
+    if (isVerified) {
+      console.log('verified and calling next');
+
+    } else {
+      console.log(isVerified);
+    }
+  } catch (error) {
+    next(error);
   }
-  res.send("ok");
 };
 
 export {

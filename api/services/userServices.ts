@@ -7,9 +7,9 @@ const _signupUser = async (credentials: any) => {
   return data;
 };
 
-const getUserByUsername = async (username: string) => {
+const getUserByEmail = async (email: string) => {
   const data = await db.user.findUnique({
-    where: { username },
+    where: { email },
   });
   return data;
 };
@@ -20,6 +20,7 @@ const getUserById = async (id: string) => {
   });
   return data;
 };
+
 const _updateUser = async (id: string, updates: any) => {
   const data = await db.user.update({
     where: { id },
@@ -28,4 +29,4 @@ const _updateUser = async (id: string, updates: any) => {
   return data;
 };
 
-export { _signupUser, getUserByUsername, getUserById, _updateUser };
+export { _signupUser, getUserByEmail, getUserById, _updateUser };
