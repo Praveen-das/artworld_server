@@ -14,10 +14,10 @@ const app = express();
 app.set("view engine", "ejs");
 initializePassport(passport);
 
-/*----------->> MIDDLEWARE <<-----------*/
+/*----------->> MIDDLEWARES <<-----------*/
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000"],
     credentials: true,
   })
 );
@@ -37,6 +37,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 /*----------->> ROUTERS <<-----------*/
+app.get("/asd", (req, res) => {
+  res.json({ user: "asdasdasdasd" });
+});
 app.use("/auth", authenticationRouter);
 app.use("/products", productRouter);
 app.use("/user", userRouter);

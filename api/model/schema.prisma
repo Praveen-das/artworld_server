@@ -12,16 +12,19 @@ datasource db {
 
 model User {
   displayName String
-  email       String @unique
+  email       String?
   password    String?
   photo       String?
-  id          String @id @unique @default(uuid())
+  provider    provider_type @default(web)
+  id          String        @id @unique @default(uuid())
 
   address                                     Address[]
   product                                     Product[]
   reviews                                     Reviews[]
   sales_order_personTosales_order_customer_id sales_order[] @relation("personTosales_order_customer_id")
   sales_order_personTosales_order_seller_id   sales_order[] @relation("personTosales_order_seller_id")
+
+  @@unique([email, provider])
 }
 
 model UserVerificationRecords {
@@ -36,8 +39,9 @@ model Address {
   city            String  @db.VarChar(40)
   state           String  @db.VarChar(20)
   pincode         Int
-  alternate_phone String? @db.VarChar(20)
   mobile          String  @db.VarChar(20)
+  alternate_phone String? @db.VarChar(20)
+  email           String
   id              String  @id @default(uuid())
 
   user_id String
@@ -124,6 +128,13 @@ model sales_order {
 enum sex_type {
   M
   F
+}
+
+enum provider_type {
+  web
+  google
+  facebook
+  twitter
 }
 
 enum status_type {
