@@ -8,16 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// tables///////////////////////////////////////////////////////////////////////
-
 model User {
-  displayName String
-  email       String?
-  password    String?
-  photo       String?
-  provider    provider_type @default(web)
-  id          String        @id @unique @default(uuid())
-
+  displayName                                 String
+  email                                       String?
+  password                                    String?
+  photo                                       String?
+  provider                                    provider_type @default(web)
+  id                                          String        @id @unique @default(uuid())
   address                                     Address[]
   product                                     Product[]
   reviews                                     Reviews[]
@@ -39,38 +36,37 @@ model Address {
   city            String  @db.VarChar(40)
   state           String  @db.VarChar(20)
   pincode         Int
-  mobile          String  @db.VarChar(20)
-  alternate_phone String? @db.VarChar(20)
   email           String
   id              String  @id @default(uuid())
-
-  user_id String
-  user    User   @relation(fields: [user_id], references: [id])
+  isDefault       Boolean
+  mobile          Int
+  alternate_phone Int?
+  user            User    @relation(fields: [user_id], references: [id])
+  user_id         String
 }
 
 model Product {
-  name         String   @db.VarChar(50)
-  desc         String
-  width        Int
-  height       Int
-  quantity     Int
-  price        Int
-  discount     Int
-  images       Json[]
-  defaultImage String
-  createdAt    DateTime @default(now())
-  modifiedAt   DateTime @updatedAt
-  id           String   @id @default(uuid())
-
-  category        Category?  @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  name            String     @db.VarChar(50)
+  desc            String
+  width           Int
+  height          Int
+  quantity        Int
+  price           Int
+  discount        Int
+  images          Json[]
+  defaultImage    String
+  createdAt       DateTime   @default(now())
+  modifiedAt      DateTime   @updatedAt
+  id              String     @id @default(uuid())
   category_id     Int?
-  material        Material?  @relation(fields: [material_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   material_id     Int?
-  seles_person    User?      @relation(fields: [seles_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_selles_person_id_fkey")
   seles_person_id String?
-  reviews         Reviews[]
-  cart_item       cart_item? @relation(fields: [cart_itemId], references: [id])
   cart_itemId     Int?
+  cart_item       cart_item? @relation(fields: [cart_itemId], references: [id])
+  category        Category?  @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  material        Material?  @relation(fields: [material_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  seles_person    User?      @relation(fields: [seles_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_selles_person_id_fkey")
+  reviews         Reviews[]
 
   @@unique([name, desc])
 }
@@ -88,40 +84,36 @@ model Material {
 }
 
 model Reviews {
-  createdAt DateTime @default(now())
-  vote      Int      @db.SmallInt
-  review    String
-  id        Int      @id @default(autoincrement())
-
-  product    Product? @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt  DateTime @default(now())
+  vote       Int      @db.SmallInt
+  review     String
+  id         Int      @id @default(autoincrement())
   product_id String?
-  user       User?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user_id    String?
+  product    Product? @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([user_id, product_id])
 }
 
 model cart_item {
-  quantity Int
-  discount Int @default(0)
-  id       Int @id @default(autoincrement())
-
-  product        Product[]
-  sales_order    sales_order? @relation(fields: [seles_order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  quantity       Int
+  discount       Int          @default(0)
+  id             Int          @id @default(autoincrement())
   seles_order_id String?
+  sales_order    sales_order? @relation(fields: [seles_order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product        Product[]
 }
 
 model sales_order {
-  timer_order_taken DateTime     @default(now())
-  delivery_time     DateTime     @db.Date
-  // purchase_order_number BigInt
-  status            status_type? @default(pending)
-  id                String       @id @default(uuid())
-
-  person_personTosales_order_customer_id User?       @relation("personTosales_order_customer_id", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  timer_order_taken                      DateTime     @default(now())
+  delivery_time                          DateTime     @db.Date
+  status                                 status_type? @default(pending)
+  id                                     String       @id @default(uuid())
   customer_id                            String?
-  person_personTosales_order_seller_id   User?       @relation("personTosales_order_seller_id", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   seller_id                              String?
+  person_personTosales_order_customer_id User?        @relation("personTosales_order_customer_id", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  person_personTosales_order_seller_id   User?        @relation("personTosales_order_seller_id", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   cart_item                              cart_item[]
 }
 

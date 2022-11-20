@@ -96,12 +96,30 @@ const confirmVerification = async (req: any, res: any, next: any) => {
     next(error);
   }
 };
+
 const addUserAddress = async (req: any, res: any, next: any) => {
   const userId = req.user.id;
   const address = req.body;
+  address["user_id"] = userId;
 
   try {
-    address["user_id"] = userId;
+    _addUserAddress(address)
+      .then((data) => res.json(data))
+      .catch((err) => {
+        prismaErrorHandler(err, next);
+        next(err);
+      });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateUserAddress = async (req: any, res: any, next: any) => {
+  const userId = req.user.id;
+  const address = req.body;
+  address["user_id"] = userId;
+
+  try {
     _addUserAddress(address)
       .then((data) => res.json(data))
       .catch((err) => {
@@ -120,4 +138,5 @@ export {
   sendEmailVerification,
   confirmVerification,
   updateUser,
+  addUserAddress
 };
