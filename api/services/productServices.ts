@@ -6,20 +6,6 @@ interface sortInterface {
   method: string;
 }
 
-interface Product_Item {
-  name: string;
-  description: string;
-  material_id: number;
-  category_id: number;
-  price: number;
-  width: number;
-  height: number;
-  quantity: number;
-  images: string[];
-  tags: string[];
-  price_range: any;
-}
-
 const select = {
   name: true,
   desc: true,
@@ -33,18 +19,20 @@ const select = {
   images: true,
   reviews: true,
   createdAt: true,
-  seles_person: true,
+  sales_person: true,
   defaultImage: true,
   id: true,
 };
 
 const _fetchProducts = async (
+  
   sort: sortInterface,
   { price_range = {}, ...product }: any, ////destructure price range from facets and assign rest to product
   search: any,
   page: number,
   limit: number
-) => {
+  ) => {
+
   let { lt, gt } = price_range; /////////////parse price range to integer
   price_range.lt = lt && parseInt(lt) + 1; //parse price range to integer
   price_range.gt = gt && parseInt(gt) - 1; //parse price range to integer
@@ -55,7 +43,6 @@ const _fetchProducts = async (
         ...product,
         ...search,
         price: { ...price_range },
-        
       },
       select,
       skip: (page - 1) * limit,
@@ -65,6 +52,33 @@ const _fetchProducts = async (
     db.product.count({
       select: { id: true },
       where: { ...product, ...search, price: { ...price_range } },
+    }),
+  ]);
+
+  return data
+}
+
+const _fetchAdminProducts = async (
+  userId: string,
+  search: any,
+  page: number,
+  limit: number
+) => {
+  const data: object = await db.$transaction([
+    db.product.findMany({
+      where: {
+        sales_person_id: userId,
+        ...search
+      },
+      select,
+      skip: (page - 1) * limit,
+      take: limit
+    }),
+    db.product.count({
+      select: { id: true },
+      where: {
+        sales_person_id: userId, ...search
+      },
     }),
   ]);
 
@@ -84,6 +98,7 @@ const _addProduct = async (product: any) => {
     data: product,
     select,
   });
+
   return res;
 };
 
@@ -115,6 +130,7 @@ const _searchProduct = async (query: any) => {
 
 export {
   _fetchProducts,
+  _fetchAdminProducts,
   _fetchProductById,
   _addProduct,
   _removeProduct,

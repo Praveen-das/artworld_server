@@ -9,6 +9,8 @@ import imageKitRouter from "./api/routes/imageKit";
 import initializePassport from "./api/services/passport";
 import passport from "passport";
 import authenticationRouter from "./api/routes/OAuthRouter";
+import userCart from "./api/routes/userCart";
+import userReviews from "./api/routes/useReviews";
 
 const app = express();
 app.set("view engine", "ejs");
@@ -37,12 +39,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 /*----------->> ROUTERS <<-----------*/
-app.get("/asd", (req, res) => {
-  res.json({ user: "asdasdasdasd" });
-});
 app.use("/auth", authenticationRouter);
 app.use("/products", productRouter);
 app.use("/user", userRouter);
+app.use("/cart", userCart);
 app.use("/imagekit", imageKitRouter);
+app.use("/reviews", userReviews);
 
 app.listen(3001, () => console.log("server running on port 3001"));

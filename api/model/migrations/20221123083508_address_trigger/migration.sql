@@ -1,13 +1,5 @@
-/*
-  Warnings:
-
-  - Made the column `isDefault` on table `Address` required. This step will fail if there are existing NULL values in that column.
-
-*/
--- AlterTable
-ALTER TABLE "Address" ALTER COLUMN "isDefault" SET NOT NULL;
-
---CreateTriggerFunction
+-- This is an empty migration.
+-- CreateTriggerFunction
 -- CREATE OR REPLACE FUNCTION set_trigger()
 --     RETURNS trigger
 --     LANGUAGE 'plpgsql'
@@ -19,9 +11,9 @@ ALTER TABLE "Address" ALTER COLUMN "isDefault" SET NOT NULL;
 -- END;
 -- $BODY$;
 
---CreateTrigger
+-- CreateTrigger
 -- CREATE TRIGGER trigger_default_address
---     BEFORE INSERT OR UPDATE OF "isDefault"
+--     BEFORE INSERT OR UPDATE
 --     ON public."Address"
 --     FOR EACH ROW
 --     WHEN (new."isDefault" = true)

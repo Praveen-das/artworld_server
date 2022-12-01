@@ -10,7 +10,7 @@ const getUserByEmail = async (email: string, provider?: "web") => {
   const data = await db.user.findFirst({
     where: { email, provider },
     include: {
-      address: true,
+      address: { orderBy: { createdAt: 'desc' } },
     },
   });
 
@@ -21,7 +21,7 @@ const getUserById = async (id: string) => {
   const data = await db.user.findUnique({
     where: { id },
     include: {
-      address: true,
+      address: { orderBy: { createdAt: 'desc' } },
     },
   });
 
@@ -50,6 +50,11 @@ const _updateUserAddress = async (id: string, address: any) => {
   // return data;
 };
 
+const _deleteUserAddress = async (id: string) => {
+  const data = await db.address.delete({ where: { id } });
+  return data;
+};
+
 
 export {
   _signupUser,
@@ -57,4 +62,5 @@ export {
   getUserById,
   _updateUser,
   _addUserAddress,
+  _deleteUserAddress
 };

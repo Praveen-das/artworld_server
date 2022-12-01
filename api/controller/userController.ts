@@ -1,5 +1,6 @@
 import {
   _addUserAddress,
+  _deleteUserAddress,
   _signupUser,
   _updateUser,
 } from "../services/userServices";
@@ -8,6 +9,7 @@ import passport from "passport";
 import { sendMail } from "../services/nodeMailer";
 import { generateToken, verifyToken } from "../services/jwt";
 import { prismaErrorHandler } from "../utils/PrismaErrorHandler";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 const hashPassword = async (password: string) => {
   const salt = 12;
@@ -70,6 +72,7 @@ const updateUser = async (req: any, res: any, next: any) => {
     .then((data) => res.status(200).json(data))
     .catch((err) => {
       prismaErrorHandler(err, next);
+      next(err);
     });
 };
 
@@ -101,12 +104,25 @@ const addUserAddress = async (req: any, res: any, next: any) => {
   const userId = req.user.id;
   const address = req.body;
   address["user_id"] = userId;
+  let isDefault = false
 
   try {
+    if (address?.isDefault) {
+      isDefault = true
+    }
+
+    delete address.isDefault
+
     _addUserAddress(address)
-      .then((data) => res.json(data))
+      .then(async (data: any) => {
+        if (isDefault) {
+          await _updateUser(userId, { default_address: data.id })
+        }
+        res.json(data)
+      })
       .catch((err) => {
-        prismaErrorHandler(err, next);
+        if (err instanceof PrismaClientKnownRequestError)
+          return prismaErrorHandler(err, next);
         next(err);
       });
   } catch (error) {
@@ -123,7 +139,8 @@ const updateUserAddress = async (req: any, res: any, next: any) => {
     _addUserAddress(address)
       .then((data) => res.json(data))
       .catch((err) => {
-        prismaErrorHandler(err, next);
+        if (err instanceof PrismaClientKnownRequestError)
+          return prismaErrorHandler(err, next);
         next(err);
       });
   } catch (error) {
@@ -131,12 +148,35 @@ const updateUserAddress = async (req: any, res: any, next: any) => {
   }
 };
 
-export {
+const deleteUserAddress = async (req: any, res: any, next: any) => {
+  const id = req.params.id;
+
+  try {
+    _deleteUserAddress(id)
+      .then((data) => {
+        const address = req.user.address
+        const newAddress = address.filter((o: any) => o.id !== data.id)
+        console.log(newAddress)
+        res.json(newAddress)
+      })
+      .catch((err) => {
+        if (err instanceof PrismaClientKnownRequestError)
+          return prismaErrorHandler(err, next);
+        next(err);
+      });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default {
   signupUser,
   signinUser,
   logoutUser,
   sendEmailVerification,
   confirmVerification,
   updateUser,
-  addUserAddress
+  addUserAddress,
+  updateUserAddress,
+  deleteUserAddress
 };

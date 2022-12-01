@@ -1,7 +1,10 @@
 import express from "express";
 import passport from "passport";
+import userController from "../controller/userController";
+import productController from '../controller/productController'
+import { auth } from "../services/globalServices";
 
-import {
+const {
   signupUser,
   signinUser,
   logoutUser,
@@ -9,26 +12,30 @@ import {
   sendEmailVerification,
   confirmVerification,
   addUserAddress,
-} from "../controller/userController";
-import { auth } from "../services/globalServices";
+  deleteUserAddress,
+} = userController
+
+const { fetchAdminProducts } = productController
 
 const userRouter = express.Router();
 
 userRouter.get("/", auth, (req, res) => res.json(req.user));
-userRouter.put("/", updateUser);
+userRouter.put("/update", updateUser);
 userRouter.post("/signup", signupUser);
 userRouter.post("/signin", passport.authenticate("local"), signinUser);
 userRouter.get("/logout", logoutUser);
-userRouter.post("/emailverification", sendEmailVerification);
-userRouter.get("/verify", confirmVerification);
+userRouter.get("/products", fetchAdminProducts);
+
+// userRouter.get("/address", auth, (req: any, res) => res.json(req.user.address));
 userRouter.post("/address", addUserAddress);
-userRouter.put("/address", addUserAddress);
+userRouter.delete("/address/:id", deleteUserAddress);
+// userRouter.put("/address", updateUserAddress);
 
 /*---------------------->> ERROR HANDLER <<----------------------*/
 
 userRouter.use((err: any, req: any, res: any, next: any) => {
   if (err) {
-    console.log("ERROR HANDLER", err);
+    console.log("ERROR HANDLER USER ROUTER", err);
     res.status(err.code).send(err.error);
   }
 });

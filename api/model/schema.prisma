@@ -9,14 +9,19 @@ datasource db {
 }
 
 model User {
-  displayName                                 String
-  email                                       String?
-  password                                    String?
-  photo                                       String?
-  provider                                    provider_type @default(web)
-  id                                          String        @id @unique @default(uuid())
+  displayName     String
+  email           String?
+  password        String?
+  photo           String?
+  provider        provider_type @default(web)
+  default_address String?
+  createdAt       DateTime      @default(now())
+  cart            cart_item[]
+  id              String        @id @unique @default(uuid())
+
   address                                     Address[]
   product                                     Product[]
+  wishlist                                    wishlist[]
   reviews                                     Reviews[]
   sales_order_personTosales_order_customer_id sales_order[] @relation("personTosales_order_customer_id")
   sales_order_personTosales_order_seller_id   sales_order[] @relation("personTosales_order_seller_id")
@@ -31,42 +36,44 @@ model UserVerificationRecords {
 }
 
 model Address {
-  name            String  @db.VarChar(60)
-  address         String
-  city            String  @db.VarChar(40)
-  state           String  @db.VarChar(20)
-  pincode         Int
-  email           String
-  id              String  @id @default(uuid())
-  isDefault       Boolean
+  name      String   @db.VarChar(60)
+  address   String
+  city      String   @db.VarChar(40)
+  state     String   @db.VarChar(20)
+  pincode   Int
+  email     String
+  createdAt DateTime @default(dbgenerated("NOW()"))
+  id        String   @id @default(uuid())
+
   mobile          Int
   alternate_phone Int?
-  user            User    @relation(fields: [user_id], references: [id])
+  user            User   @relation(fields: [user_id], references: [id])
   user_id         String
 }
 
 model Product {
-  name            String     @db.VarChar(50)
-  desc            String
-  width           Int
-  height          Int
-  quantity        Int
-  price           Int
-  discount        Int
-  images          Json[]
-  defaultImage    String
-  createdAt       DateTime   @default(now())
-  modifiedAt      DateTime   @updatedAt
-  id              String     @id @default(uuid())
+  name         String   @db.VarChar(50)
+  desc         String
+  width        Int
+  height       Int
+  quantity     Int
+  price        Int
+  discount     Int
+  images       Json[]
+  defaultImage String
+  createdAt    DateTime @default(now())
+  modifiedAt   DateTime @updatedAt
+  id           String   @id @default(uuid())
+
   category_id     Int?
   material_id     Int?
-  seles_person_id String?
-  cart_itemId     Int?
-  cart_item       cart_item? @relation(fields: [cart_itemId], references: [id])
-  category        Category?  @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  material        Material?  @relation(fields: [material_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  seles_person    User?      @relation(fields: [seles_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_selles_person_id_fkey")
+  sales_person_id String?
+  category        Category?   @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  material        Material?   @relation(fields: [material_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sales_person    User?       @relation(fields: [sales_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_selles_person_id_fkey")
   reviews         Reviews[]
+  cart_item       cart_item[]
+  wishlist        wishlist[]
 
   @@unique([name, desc])
 }
@@ -84,10 +91,12 @@ model Material {
 }
 
 model Reviews {
-  createdAt  DateTime @default(now())
-  vote       Int      @db.SmallInt
-  review     String
-  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(dbgenerated("NOW()"))
+  modifiedAt DateTime @updatedAt
+  vote       Int?     @default(0)
+  review     Json
+  id         String   @id @default(uuid())
+
   product_id String?
   user_id    String?
   product    Product? @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -96,13 +105,26 @@ model Reviews {
   @@unique([user_id, product_id])
 }
 
+model wishlist {
+  id String @id @default(uuid())
+
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id String
+  User       User    @relation(fields: [user_id], references: [id])
+  user_id    String
+}
+
 model cart_item {
-  quantity       Int
-  discount       Int          @default(0)
-  id             Int          @id @default(autoincrement())
-  seles_order_id String?
-  sales_order    sales_order? @relation(fields: [seles_order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  product        Product[]
+  quantity Int
+  discount Int    @default(0)
+  id       String @id @default(uuid())
+
+  sales_order_id String?
+  sales_order    sales_order? @relation(fields: [sales_order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product        Product?     @relation(fields: [product_id], references: [id])
+  product_id     String
+  User           User?        @relation(fields: [user_id], references: [id])
+  user_id        String
 }
 
 model sales_order {
