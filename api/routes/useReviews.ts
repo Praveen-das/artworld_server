@@ -12,8 +12,8 @@ const {
 
 router.get("/:id", getProductReview);
 router.post("/add", addReview);
-router.put("/update/:id", deleteReview);
-router.delete("/delete/:id", updateReview);
+router.put("/update/:id", updateReview);
+router.delete("/delete/:id", deleteReview);
 
 /*----------->> ERROR HANDLER <<-----------*/
 router.use((err: any, req: any, res: any, next: any) => {
