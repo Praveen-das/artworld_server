@@ -3,7 +3,12 @@ import {
   _deleteUserAddress,
   _signupUser,
   _updateUser,
+  _addToWishlist,
+  _removeFromlist,
+  _getUserWishlist,
+  _addToRV
 } from "../services/userServices";
+
 import bcrypt from "bcrypt";
 import passport from "passport";
 import { sendMail } from "../services/nodeMailer";
@@ -68,7 +73,7 @@ const updateUser = async (req: any, res: any, next: any) => {
     }
   }
 
-  _updateUser(req.user.id, updates)
+  _updateUser(req.user?.id, updates)
     .then((data) => res.status(200).json(data))
     .catch((err) => {
       prismaErrorHandler(err, next);
@@ -77,11 +82,11 @@ const updateUser = async (req: any, res: any, next: any) => {
 };
 
 const sendEmailVerification = async (req: any, res: any, next: any) => {
-  // await deleteUserVerificationRecord(req.user.id);
+  // await deleteUserVerificationRecord(req.user?.id);
 
   const payload = req.body;
 
-  const token = generateToken({ ...payload, user_id: req.user.id });
+  const token = generateToken({ ...payload, user_id: req.user?.id });
 
   // await setUserVerificationRecord(user_id, token);
   sendMail(token);
@@ -101,7 +106,7 @@ const confirmVerification = async (req: any, res: any, next: any) => {
 };
 
 const addUserAddress = async (req: any, res: any, next: any) => {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const address = req.body;
   address["user_id"] = userId;
   let isDefault = false
@@ -131,7 +136,7 @@ const addUserAddress = async (req: any, res: any, next: any) => {
 };
 
 const updateUserAddress = async (req: any, res: any, next: any) => {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const address = req.body;
   address["user_id"] = userId;
 
@@ -169,6 +174,42 @@ const deleteUserAddress = async (req: any, res: any, next: any) => {
   }
 };
 
+const addToWishlist = (req: any, res: any, next: any) => {
+  const user_id = req.user?.id
+  const product_id = req.params.id
+
+  _addToWishlist({ user_id, product_id })
+    .then(data => res.json(data))
+    .catch(next)
+}
+
+const removeFromWishlist = (req: any, res: any, next: any) => {
+  const id = req.params.id
+
+  _removeFromlist(id)
+    .then(data => res.json(data))
+    .catch(next)
+}
+
+const getUserWishlist = (req: any, res: any, next: any) => {
+  const user_id = req.user?.id
+  if (!user_id) return res.json([])
+  _getUserWishlist(user_id)
+    .then(data => res.json(data))
+    .catch(next)
+}
+
+const addToRV = (req: any, res: any, next: any) => {
+  const user_id = req.user?.id
+  const product_id = req.params.id
+
+  if (!user_id) return res.json([])
+
+  _addToRV({ user_id, product_id })
+    .then(data => res.json(data))
+    .catch(next)
+}
+
 export default {
   signupUser,
   signinUser,
@@ -178,5 +219,10 @@ export default {
   updateUser,
   addUserAddress,
   updateUserAddress,
-  deleteUserAddress
+  deleteUserAddress,
+
+  addToWishlist,
+  getUserWishlist,
+  removeFromWishlist,
+  addToRV
 };

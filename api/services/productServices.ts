@@ -1,58 +1,52 @@
 import { PrismaClient } from "@prisma/client";
 const db = new PrismaClient({ errorFormat: "minimal" });
 
-interface sortInterface {
-  item: any;
-  method: string;
-}
-
-const select = {
-  name: true,
-  desc: true,
+const include = {
   material: true,
   category: true,
-  width: true,
-  height: true,
-  quantity: true,
-  price: true,
-  discount: true,
-  images: true,
-  reviews: true,
-  createdAt: true,
-  sales_person: true,
-  defaultImage: true,
-  id: true,
+  sales_person: {
+    select: {
+      createdAt: true,
+      displayName: true,
+      email: true,
+      id: true,
+      photo: true,
+    }
+  },
+  reviews: true
 };
 
-const _fetchProducts = async (
-  
-  sort: sortInterface,
-  { price_range = {}, ...product }: any, ////destructure price range from facets and assign rest to product
-  search: any,
-  page: number,
-  limit: number
-  ) => {
-
-  let { lt, gt } = price_range; /////////////parse price range to integer
-  price_range.lt = lt && parseInt(lt) + 1; //parse price range to integer
-  price_range.gt = gt && parseInt(gt) - 1; //parse price range to integer
-
+const _fetchProducts = async ({ search, o, p, facets, limit }: any) => {
   const data = await db.$transaction([
     db.product.findMany({
       where: {
-        ...product,
+        category_id: { in: facets?.category },
+        material_id: { in: facets?.material },
+        rating: { gte: facets?.rating && facets?.rating[0] },
+        price: {
+          gte: facets?.price_range && facets?.price_range[0].min,
+          lte: facets?.price_range && facets?.price_range[0].max,
+        },
         ...search,
-        price: { ...price_range },
       },
-      select,
-      skip: (page - 1) * limit,
+      include,
+      skip: (p - 1) * limit,
       take: limit,
-      orderBy: { [sort.item]: sort.method },
+      orderBy: { [o?.item || 'createdAt']: o?.value || 'desc' },
     }),
     db.product.count({
       select: { id: true },
-      where: { ...product, ...search, price: { ...price_range } },
+      where: {
+        // ...facets,
+        // ...search,
+      },
     }),
+    db.category.findMany(),
+    db.material.findMany(),
+    db.product.aggregate({
+      _min: { price: true },
+      _max: { price: true }
+    })
   ]);
 
   return data
@@ -68,9 +62,10 @@ const _fetchAdminProducts = async (
     db.product.findMany({
       where: {
         sales_person_id: userId,
-        ...search
+        ...search,
+
       },
-      select,
+      include,
       skip: (page - 1) * limit,
       take: limit
     }),
@@ -80,6 +75,8 @@ const _fetchAdminProducts = async (
         sales_person_id: userId, ...search
       },
     }),
+    db.category.findMany(),
+    db.material.findMany()
   ]);
 
   return data;
@@ -88,15 +85,16 @@ const _fetchAdminProducts = async (
 const _fetchProductById = async (id: string) => {
   const res = await db.product.findUnique({
     where: { id },
-    select,
+    include
   });
+
   return res;
 };
 
 const _addProduct = async (product: any) => {
   const res = await db.product.create({
     data: product,
-    select,
+    include
   });
 
   return res;
@@ -111,7 +109,7 @@ const _updateProduct = async (id: string, updates: any) => {
   const res = await db.product.update({
     where: { id },
     data: updates,
-    // select,
+    // include
   });
   return res;
 };
@@ -122,7 +120,7 @@ const _searchProduct = async (query: any) => {
     where: {
       name: query.name,
     },
-    select,
+    include,
     take: 20,
   });
   return data;

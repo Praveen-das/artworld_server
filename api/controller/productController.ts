@@ -1,3 +1,5 @@
+import { object, number, string, array } from "yup";
+
 import {
   _fetchProducts,
   _fetchAdminProducts,
@@ -9,46 +11,42 @@ import {
 } from "../services/productServices";
 
 const fetchProducts = (req: any, res: any, next: any) => {
-  const SORT_DEFAULTS = "createdAt_desc";
-  const DEFAULT_PAGE = 1;
-  const DEFAULT_LIMIT = 10;
+  let request = object({
+    p: number().default(1),
+    q: string(),
+    limit: number().default(10),
+  }).shape({
+    facets: object({
+      category: array(number()),
+      material: array(number()),
+      rating: array(number()),
+      price_range: array(object({ min: number(), max: number() })),
+    })
+  })
 
-  let {
-    sort = SORT_DEFAULTS,
-    facets = {},
-    query,
-    page = DEFAULT_PAGE,
-    limit = DEFAULT_LIMIT,
-  } = req.query;
+  const { q, ...query }: any = request.validateSync(req.query);
 
-  let search
-
-  if (query) {
-    search = {
+  if (q) {
+    query['search'] = {
       name: {
-        search: query
+        search: q
       },
       id: {
-        search: query
+        search: q
       },
     }
   }
 
-  const [item, method] = sort?.split("_");
-  const sortingConstraints = { item, method };
-
-  limit = parseInt(limit);
-  page = parseInt(page);
-
-  _fetchProducts(sortingConstraints, facets, search, page, limit)
-    .then((data) => res.status(200).send(data))
+  _fetchProducts(query)
+    .then((data) => res.send(data))
     .catch(next);
 };
+
 
 const fetchAdminProducts = (req: any, res: any, next: any) => {
   const DEFAULT_PAGE = 1;
   const DEFAULT_LIMIT = 10;
-  const userId = req.user.id
+  const userId = req.user?.id
 
   let {
     page = DEFAULT_PAGE,
@@ -94,7 +92,7 @@ const searchProductByName = (req: any, res: any, next: any) => {
 
 const addProduct = async (req: any, res: any, next: any) => {
   const product = req.body;
-  product['sales_person_id'] = req.user.id
+  product['sales_person_id'] = req.user?.id
 
   _addProduct(product)
     .then((data) => res.status(200).send(data))

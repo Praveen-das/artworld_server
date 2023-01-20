@@ -6,9 +6,9 @@ const _signupUser = async (credentials: any) => {
   });
 };
 
-const getUserByEmail = async (email: string, provider?: "web") => {
+const getUserByEmail = async (email: string, provider: any = 'web') => {
   const data = await db.user.findFirst({
-    where: { email, provider },
+    where: { email, provider: provider },
     include: {
       address: { orderBy: { createdAt: 'desc' } },
     },
@@ -22,6 +22,18 @@ const getUserById = async (id: string) => {
     where: { id },
     include: {
       address: { orderBy: { createdAt: 'desc' } },
+      recently_viewed: {
+        orderBy: { createdAt: 'desc' },
+        include: {
+          product: {
+            include: {
+              material: true,
+              category: true,
+              sales_person: true
+            }
+          },
+        }
+      }
     },
   });
 
@@ -55,6 +67,25 @@ const _deleteUserAddress = async (id: string) => {
   return data;
 };
 
+const _addToWishlist = async (data: any) => {
+  const res = await db.wishlist.create({ data });
+  return res;
+};
+
+const _getUserWishlist = async (user_id: string) => {
+  const res = await db.wishlist.findMany({ where: { user_id } });
+  return res;
+};
+
+const _removeFromlist = async (id: any) => {
+  const res = await db.wishlist.delete({ where: { id } });
+  return res;
+};
+
+const _addToRV = async (data: any) => {
+  const res = await db.recently_viewed.create({ data });
+  return res;
+};
 
 export {
   _signupUser,
@@ -62,5 +93,10 @@ export {
   getUserById,
   _updateUser,
   _addUserAddress,
-  _deleteUserAddress
+  _deleteUserAddress,
+
+  _addToWishlist,
+  _getUserWishlist,
+  _removeFromlist,
+  _addToRV
 };

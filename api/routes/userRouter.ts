@@ -9,10 +9,13 @@ const {
   signinUser,
   logoutUser,
   updateUser,
-  sendEmailVerification,
-  confirmVerification,
   addUserAddress,
   deleteUserAddress,
+
+  getUserWishlist,
+  addToWishlist,
+  removeFromWishlist,
+  addToRV
 } = userController
 
 const { fetchAdminProducts } = productController
@@ -26,9 +29,14 @@ userRouter.post("/signin", passport.authenticate("local"), signinUser);
 userRouter.get("/logout", logoutUser);
 userRouter.get("/products", fetchAdminProducts);
 
-// userRouter.get("/address", auth, (req: any, res) => res.json(req.user.address));
 userRouter.post("/address", addUserAddress);
 userRouter.delete("/address/:id", deleteUserAddress);
+
+userRouter.get("/wishlist", getUserWishlist);
+userRouter.post("/wishlist/add/:id", addToWishlist);
+userRouter.delete("/wishlist/remove/:id", removeFromWishlist);
+
+userRouter.post("/rv/add/:id", addToRV);
 // userRouter.put("/address", updateUserAddress);
 
 /*---------------------->> ERROR HANDLER <<----------------------*/
@@ -36,6 +44,8 @@ userRouter.delete("/address/:id", deleteUserAddress);
 userRouter.use((err: any, req: any, res: any, next: any) => {
   if (err) {
     console.log("ERROR HANDLER USER ROUTER", err);
+    console.log(err);
+
     res.status(err.code).send(err.error);
   }
 });
