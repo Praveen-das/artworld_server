@@ -6,7 +6,7 @@ const _signupUser = async (credentials: any) => {
   });
 };
 
-const getUserByEmail = async (email: string, provider: any = 'web') => {
+const _getUserByEmail = async (email: string, provider: any = 'web') => {
   const data = await db.user.findFirst({
     where: { email, provider: provider },
     include: {
@@ -17,7 +17,7 @@ const getUserByEmail = async (email: string, provider: any = 'web') => {
   return data;
 };
 
-const getUserById = async (id: string) => {
+const _getUserById = async (id: string) => {
   const data = await db.user.findUnique({
     where: { id },
     include: {
@@ -89,8 +89,8 @@ const _addToRV = async (data: any) => {
 
 export {
   _signupUser,
-  getUserByEmail,
-  getUserById,
+  _getUserByEmail,
+  _getUserById,
   _updateUser,
   _addUserAddress,
   _deleteUserAddress,

@@ -76,7 +76,7 @@ const fetchAdminProducts = (req: any, res: any, next: any) => {
 };
 
 const fetchProductById = (req: any, res: any, next: any) => {
-  const { id } = req.params;
+  const id = req.params.id;
 
   _fetchProductById(id)
     .then((data) => res.status(200).send(data))

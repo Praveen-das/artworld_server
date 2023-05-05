@@ -27,6 +27,7 @@ const _fetchProducts = async ({ search, o, p, facets, limit }: any) => {
           gte: facets?.price_range && facets?.price_range[0].min,
           lte: facets?.price_range && facets?.price_range[0].max,
         },
+        sales_person_id: facets?.seller_id,
         ...search,
       },
       include,
