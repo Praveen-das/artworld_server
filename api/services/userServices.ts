@@ -73,7 +73,7 @@ const _addToWishlist = async (data: any) => {
 };
 
 const _getUserWishlist = async (user_id: string) => {
-  const res = await db.wishlist.findMany({ where: { user_id } });
+  const res = await db.wishlist.findMany({ where: { user_id }, include: { product: true } });
   return res;
 };
 

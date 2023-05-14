@@ -5,7 +5,12 @@ const _fetchUserCart = async (user_id: string) => {
     const data = await db.$transaction([
         db.cart_item.findMany({
             where: { user_id },
-            include: { product: true }
+            include: {
+                product: {
+                    include: { sales_person: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
         }),
         db.cart_item.aggregate({
             where: { user_id },
