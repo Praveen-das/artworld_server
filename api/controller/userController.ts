@@ -7,7 +7,9 @@ import {
   _removeFromlist,
   _getUserWishlist,
   _addToRV,
-  _getUserById
+  _getUserById,
+  _addSocialMediaLink,
+  _removeSocialMediaLink
 } from "../services/userServices";
 
 import bcrypt from "bcrypt";
@@ -219,6 +221,25 @@ const addToRV = (req: any, res: any, next: any) => {
     .catch(next)
 }
 
+const addSocialMediaLink = (req: any, res: any, next: any) => {
+  const user_id = req.user?.id
+  const links = req.body
+
+  if (!user_id) return res.json([])
+
+  _addSocialMediaLink(user_id, links)
+    .then(data => res.json(data))
+    .catch(next)
+}
+
+const removeSocialMediaLink = (req: any, res: any, next: any) => {
+  const id = req.params.id
+
+  _removeSocialMediaLink(id)
+    .then(data => res.json(data))
+    .catch(next)
+}
+
 export default {
   getUserById,
   signupUser,
@@ -234,5 +255,8 @@ export default {
   addToWishlist,
   getUserWishlist,
   removeFromWishlist,
-  addToRV
+  addToRV,
+
+  addSocialMediaLink,
+  removeSocialMediaLink
 };

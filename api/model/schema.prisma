@@ -17,6 +17,7 @@ model User {
   default_address String?
   createdAt       DateTime      @default(dbgenerated("NOW()"))
   cart            cart_item[]
+  social          Social[]
   id              String        @id @unique @default(uuid())
 
   address                                     Address[]
@@ -30,6 +31,17 @@ model User {
   Chat                                        Chat[]
 
   @@unique([email, provider])
+}
+
+model Social {
+  url     String
+  name    String
+  User    User?  @relation(fields: [user_id], references: [id])
+  user_id String
+
+  id String @id @unique @default(uuid())
+
+  @@unique([user_id, name])
 }
 
 model UserVerificationRecords {
@@ -133,6 +145,7 @@ model recently_viewed {
 model cart_item {
   createdAt DateTime @default(dbgenerated("NOW()"))
   quantity  Int
+  // size      String
   price     Int
   discount  Int      @default(0)
   id        String   @id @default(uuid())
