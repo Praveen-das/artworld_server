@@ -75,9 +75,11 @@ const app = express();
 
 
 import product from "./api/product"
+import test from "./api/test/test"
 
 app.get("/", (_, res) => res.send('server working'));
 app.use("/api/product", product);
+app.use("/api/test", test);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server is running in port ${PORT}`));
