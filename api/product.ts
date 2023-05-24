@@ -3,7 +3,8 @@ const router = express.Router();
 
 router.get("/", async (req: any, res: any) => {
   try {
-    res.setHeader('Set-Cookie', ['name=praveen']);
+    res.setHeader('Set-Cookie', 'name=praveen; SameSite=None');
+
     res.send("route working successfully");
     // res.end('New cookie set');
   } catch (error) {
