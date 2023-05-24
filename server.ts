@@ -17,14 +17,14 @@ import initializeSocket from './api/services/socketIO'
 const app = express();
 // const httpServer = createServer(app)
 
-app.set("view engine", "ejs");
+// app.set("view engine", "ejs");
 initializePassport(passport);
 
 /*----------->> MIDDLEWARES <<-----------*/
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://artsworld.vercel.app"],
+    origin: ["http://localhost:3000", "https://artworld-nine.vercel.app"],
     credentials: true,
   })
 );
