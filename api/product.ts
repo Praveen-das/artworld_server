@@ -1,11 +1,6 @@
-const express = require("express");
+import express from "express"
 const router = express.Router();
 
-/**
- * GET product list.
- *
- * @return product list | empty.
- */
 router.get("/", async (req: any, res: any) => {
   try {
     res.json({
