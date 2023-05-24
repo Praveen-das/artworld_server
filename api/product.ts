@@ -5,7 +5,7 @@ router.get("/", async (req: any, res: any) => {
   try {
     res.json({
       status: 200,
-      message: "Server working successfully",
+      message: "route working successfully",
     });
   } catch (error) {
     console.error(error);
