@@ -45,6 +45,7 @@ app.use(passport.session());
 
 /*----------->> ROUTERS <<-----------*/
 
+app.get('/test', (req: any, res: any) => res.send('test successfull'))
 app.use("/auth", authenticationRouter);
 app.use("/products", productRouter);
 app.use("/user", userRouter);
