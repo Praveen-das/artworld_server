@@ -1,10 +1,10 @@
-import express from "express"
-// import product from "./api/product"
+const express = require("express");
 const app = express();
+const product = require("./api/product");
 
 app.use(express.json({ extended: false }));
 
-app.get("/",(_,res)=>res.send('server running'));
+app.use("/api/product", product);
 
 const PORT = process.env.PORT || 8080;
-app.listen(8080, () => console.log(`Server is running in port ${PORT}`));
+app.listen(PORT, () => console.log(`Server is running in port ${PORT}`));

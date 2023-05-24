@@ -1,17 +1,11 @@
 import express from "express"
-
 const router = express.Router();
 
-/**
- * GET product list.
- *
- * @return product list | empty.
- */
-router.get("/", async (req, res) => {
+router.get("/", async (req: any, res: any) => {
   try {
     res.json({
       status: 200,
-      message: "Get data has successfully",
+      message: "Route working successfully",
     });
   } catch (error) {
     console.error(error);
