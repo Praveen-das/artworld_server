@@ -42,6 +42,11 @@ const sessionMW = session({
   secret: "keyboard cat",
   resave: false,
   saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true
+  }
 })
 
 app.use(sessionMW);
