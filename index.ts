@@ -1,8 +1,11 @@
 import express from "express";
 import cors from "cors";
 import session from "express-session";
+import path from 'path'
 
+import corsOptions from "./api/config/cors/corsOptions";
 
+import root from './api/root'
 import userRouter from "./api/routes/userRouter";
 import productRouter from "./api/routes/products";
 import imageKitRouter from "./api/routes/imageKit";
@@ -15,26 +18,17 @@ import payments from "./api/routes/payments";
 import salesOrder from "./api/routes/salesOrder";
 // import initializeSocket from './api/services/socketIO'
 
-import product from "./api/product"
+import product from "./api/root"
 import test from "./api/test/test"
 
 const app = express();
 // const httpServer = createServer(app)
 
-// app.set("view engine", "ejs");
 initializePassport(passport);
 
 // /*----------->> MIDDLEWARES <<-----------*/
-
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "https://artworld-nine.vercel.app"],
-    credentials: true,
-    allowedHeaders: 'Content-Type,Authorization',
-    preflightContinue: false,
-  })
-);
-
+app.use('/', express.static(path.join(__dirname, '/public')))
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -42,13 +36,14 @@ const sessionMW = session({
   secret: "keyboard cat",
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    sameSite: "none",
-    secure: true
-  }
+  // cookie: {
+  //   sameSite: 'none',
+  //   secure: true,
+  //   httpOnly: true
+  // }
 })
 
+app.set('trust proxy', 1)
 app.use(sessionMW);
 
 app.use(passport.initialize());
@@ -56,7 +51,7 @@ app.use(passport.session());
 
 // /*----------->> ROUTERS <<-----------*/
 
-app.get('/', (req: any, res: any) => res.send('server running.'))
+app.use('/', root)
 app.use("/api/product", product);
 app.use("/auth", authenticationRouter);
 app.use("/products", productRouter);
@@ -69,6 +64,12 @@ app.use("/orders", salesOrder);
 
 app.use("/api/product", product);
 app.use("/api/test", test);
+
+
+app.all('*', (_, res) => {
+  res.status(404)
+  res.sendFile(path.join(__dirname, 'views', '404.html'))
+})
 
 
 /*----------->> ERROR HANDLER <<-----------*/
