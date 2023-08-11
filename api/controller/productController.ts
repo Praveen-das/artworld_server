@@ -1,5 +1,3 @@
-import { object, number, string, array } from "yup";
-
 import {
   _fetchProducts,
   _fetchAdminProducts,
@@ -8,69 +6,41 @@ import {
   _updateProduct,
   _searchProduct,
   _fetchProductById,
+  _fetchFilterParams,
+  _fetchCategories,
 } from "../services/productServices";
+import QueryValidator from './Utils/QueryValidator'
 
 const fetchProducts = (req: any, res: any, next: any) => {
-  let request = object({
-    p: number().default(1),
-    q: string(),
-    limit: number().default(10),
-  }).shape({
-    facets: object({
-      category: array(number()),
-      material: array(number()),
-      rating: array(number()),
-      price_range: array(object({ min: number(), max: number() })),
-    })
-  })
-
-  const { q, ...query }: any = request.validateSync(req.query);
-
-  if (q) {
-    query['search'] = {
-      name: {
-        search: q
-      },
-      id: {
-        search: q
-      },
-    }
-  }
+  let query = QueryValidator(req.query)
 
   _fetchProducts(query)
     .then((data) => res.send(data))
     .catch(next);
 };
 
+const fetchFilterParams = (req: any, res: any, next: any) => {  
+  let query = QueryValidator(req.query)
+
+  _fetchFilterParams(query)
+    .then((data) => res.send(data))
+    .catch(next);
+};
+
+const fetchCategories = (req: any, res: any, next: any) => {  
+  let query = QueryValidator(req.query)
+
+  _fetchCategories(query)
+    .then((data) => res.send(data))
+    .catch(next);
+};
 
 const fetchAdminProducts = (req: any, res: any, next: any) => {
-  const DEFAULT_PAGE = 1;
-  const DEFAULT_LIMIT = 10;
-  const userId = req.user?.id
+  let query = QueryValidator(req.query)
+  
+  const userId = req.user?.id || null
 
-  let {
-    page = DEFAULT_PAGE,
-    limit = DEFAULT_LIMIT,
-    query,
-  } = req.query;
-
-  let search
-
-  if (query) {
-    search = {
-      name: {
-        search: query
-      },
-      id: {
-        search: query
-      },
-    }
-  }
-
-  limit = parseInt(limit);
-  page = parseInt(page);
-
-  _fetchAdminProducts(userId, search, page, limit)
+  _fetchAdminProducts(userId, query)
     .then((data) => res.status(200).send(data))
     .catch(next);
 };
@@ -124,4 +94,6 @@ export default {
   removeProduct,
   updateProduct,
   searchProductByName,
+  fetchFilterParams,
+  fetchCategories
 };

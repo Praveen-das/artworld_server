@@ -12,12 +12,22 @@ function _imageKit(_: any, res: any) {
 }
 
 async function _deleteFile(req: any, res: any, next: any) {
-  const fileId = req.params.id;
+  const ids = req.body;
 
-  imagekit.deleteFile(fileId, (error) => {
-    if (error) res.status(404).send(error);
-    else res.json("file removed");
+  let promises = ids?.map(async (id: string) => {
+    return await new Promise((resolve, reject) => {
+      imagekit.deleteFile(id, (error) => {
+        if (error) reject(error)
+        else resolve(true)
+      })
+    })
   });
+
+  Promise.all(promises)
+    .then((data) => {
+      res.send(data)
+    })
+    .catch((err) => console.log(err))
 }
 
 export { _imageKit, _deleteFile };
