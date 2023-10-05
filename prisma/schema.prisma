@@ -18,6 +18,7 @@ model User {
   createdAt       DateTime      @default(dbgenerated("NOW()"))
   cart            cart_item[]
   social          Social[]
+  role            user_role @default(user)
   // role            role          @default(user)
   id              String        @id @unique @default(uuid())
 
@@ -67,25 +68,38 @@ model Address {
   user_id String
 }
 
-model Product {
-  name       String   @db.VarChar(50)
-  desc       String
-  quantity   Int
-  price      Int
-  discount   Int
-  images     Json[]
-  createdAt  DateTime @default(dbgenerated("NOW()"))
-  modifiedAt DateTime @updatedAt
-  size       Json[]
-  rating     Int?
-  id         String   @id @default(uuid())
+//-----------------product schema-----------------//
 
-  category_id     Int?
-  material_id     Int?
-  sales_person_id String?
-  category        Category?         @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  material        Material?         @relation(fields: [material_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model Product {
+  name           String   @db.VarChar(50)
+  desc           String
+  quantity       Int
+  price          Int
+  discount       Int
+  images         Json[]
+  createdAt      DateTime @default(dbgenerated("NOW()"))
+  modifiedAt     DateTime @updatedAt
+  widthInInches  Int
+  heightInInches Int
+  rating         Int?
+  id             String   @id @default(uuid())
+
+  category     Category?    @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sub_category SubCategory? @relation(fields: [subCategory_id], references: [id])
+  subject      Subject?     @relation(fields: [subject_id], references: [id])
+  style        Style?       @relation(fields: [style_id], references: [id])
+  material     Material?    @relation(fields: [material_id], references: [id])
+  collections  Collections? @relation(fields: [collections_id], references: [id])
+
+  category_id    Int?
+  subCategory_id Int?
+  subject_id     Int?
+  style_id       Int?
+  material_id    Int?
+  collections_id Int?
+
   sales_person    User?             @relation(fields: [sales_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_selles_person_id_fkey")
+  sales_person_id String?
   reviews         Reviews[]
   cart_item       cart_item[]
   wishlist        wishlist[]
@@ -95,16 +109,51 @@ model Product {
 }
 
 model Category {
-  name    String    @unique @db.VarChar(30)
-  id      Int       @id @default(autoincrement())
-  product Product[]
+  name String @unique @db.VarChar(30)
+  id   Int    @id @default(autoincrement())
+
+  product      Product[]
+  sub_category SubCategory[]
+}
+
+model SubCategory {
+  name String @unique @db.VarChar(30)
+  id   Int    @id @default(autoincrement())
+
+  product     Product[]
+  Category    Category? @relation(fields: [category_id], references: [id])
+  category_id Int?
 }
 
 model Material {
-  name    String    @unique @db.VarChar(20)
-  id      Int       @id @default(autoincrement())
+  name String @unique @db.VarChar(20)
+  id   Int    @id @default(autoincrement())
+
   product Product[]
 }
+
+model Subject {
+  name String @unique @db.VarChar(30)
+  id   Int    @id @default(autoincrement())
+
+  product Product[]
+}
+
+model Style {
+  name String @unique @db.VarChar(30)
+  id   Int    @id @default(autoincrement())
+
+  product Product[]
+}
+
+model Collections {
+  name String @unique @db.VarChar(30)
+  id   Int    @id @default(autoincrement())
+
+  product Product[]
+}
+
+//****************product schema****************//
 
 model Reviews {
   createdAt  DateTime @default(dbgenerated("NOW()"))
@@ -144,7 +193,6 @@ model recently_viewed {
 model cart_item {
   createdAt DateTime @default(dbgenerated("NOW()"))
   quantity  Int
-  size      String
   price     Int
   discount  Int      @default(0)
   id        String   @id @default(uuid())
@@ -185,10 +233,10 @@ model Chat {
   createdAt DateTime @default(dbgenerated("NOW()"))
   receiver  User     @relation(fields: [user_id], references: [id])
 
-  id             String        @id @default(uuid())
-  Conversation   Conversation? @relation(fields: [conversationId], references: [id])
-  conversationId String?
-  user_id        String
+  id              String        @id @default(uuid())
+  Conversation    Conversation? @relation(fields: [conversation_id], references: [id])
+  conversation_id String?
+  user_id         String
 }
 
 enum sex_type {
@@ -196,10 +244,10 @@ enum sex_type {
   F
 }
 
-// enum role {
-//   admin
-//   user
-// }
+enum user_role {
+  seller
+  user
+}
 
 enum payment_type {
   card

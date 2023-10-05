@@ -7,7 +7,8 @@ import {
   _searchProduct,
   _fetchProductById,
   _fetchFilterParams,
-  _fetchCategories,
+  // _fetchCategories,
+  _fetchTopSellingProducts
 } from "../services/productServices";
 import QueryValidator from './Utils/QueryValidator'
 
@@ -18,22 +19,29 @@ const fetchProducts = (req: any, res: any, next: any) => {
     .then((data) => res.send(data))
     .catch(next);
 };
+const fetchTopSellingProducts = (req: any, res: any, next: any) => {
+  let query = QueryValidator(req.query)
+
+  _fetchTopSellingProducts(query)
+    .then((data) => res.send(data))
+    .catch(next);
+};
 
 const fetchFilterParams = (req: any, res: any, next: any) => {  
   let query = QueryValidator(req.query)
-
+  
   _fetchFilterParams(query)
     .then((data) => res.send(data))
     .catch(next);
 };
 
-const fetchCategories = (req: any, res: any, next: any) => {  
-  let query = QueryValidator(req.query)
+// const fetchCategories = (req: any, res: any, next: any) => {  
+//   let query = QueryValidator(req.query)
 
-  _fetchCategories(query)
-    .then((data) => res.send(data))
-    .catch(next);
-};
+//   _fetchCategories(query)
+//     .then((data) => res.send(data))
+//     .catch(next);
+// };
 
 const fetchAdminProducts = (req: any, res: any, next: any) => {
   let query = QueryValidator(req.query)
@@ -95,5 +103,6 @@ export default {
   updateProduct,
   searchProductByName,
   fetchFilterParams,
-  fetchCategories
+  // fetchCategories,
+  fetchTopSellingProducts
 };
