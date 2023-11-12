@@ -6,10 +6,12 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
   displayName     String
+  about           String?
   email           String?
   password        String?
   photo           String?
@@ -18,8 +20,7 @@ model User {
   createdAt       DateTime      @default(dbgenerated("NOW()"))
   cart            cart_item[]
   social          Social[]
-  role            user_role @default(user)
-  // role            role          @default(user)
+  role            user_role     @default(user)
   id              String        @id @unique @default(uuid())
 
   address                                     Address[]
@@ -31,8 +32,21 @@ model User {
   recently_viewed                             recently_viewed[]
   Conversation                                Conversation[]
   Chat                                        Chat[]
+  followers                                   Followers[]       @relation("followers")
+  following                                   Followers[]       @relation("following")
 
   @@unique([email, provider])
+}
+
+model Followers {
+  followingUser User   @relation("followers", fields: [followingUserId], references: [id])
+  currentUser   User   @relation("following", fields: [userId], references: [id])
+  id            String @id @unique @default(uuid())
+
+  followingUserId String
+  userId          String
+
+  @@unique([followingUserId, userId])
 }
 
 model Social {
@@ -71,18 +85,19 @@ model Address {
 //-----------------product schema-----------------//
 
 model Product {
-  name           String   @db.VarChar(50)
+  name           String         @db.VarChar(50)
   desc           String
   quantity       Int
   price          Int
   discount       Int
   images         Json[]
-  createdAt      DateTime @default(dbgenerated("NOW()"))
-  modifiedAt     DateTime @updatedAt
+  createdAt      DateTime       @default(dbgenerated("NOW()"))
+  modifiedAt     DateTime       @updatedAt
   widthInInches  Int
   heightInInches Int
+  sellingOption  selling_option
   rating         Int?
-  id             String   @id @default(uuid())
+  id             String         @id @default(uuid())
 
   category     Category?    @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   sub_category SubCategory? @relation(fields: [subCategory_id], references: [id])
@@ -229,12 +244,12 @@ model Conversation {
 }
 
 model Chat {
-  message   String
-  createdAt DateTime @default(dbgenerated("NOW()"))
-  receiver  User     @relation(fields: [user_id], references: [id])
+  message      String
+  createdAt    DateTime      @default(dbgenerated("NOW()"))
+  receiver     User          @relation(fields: [user_id], references: [id])
+  Conversation Conversation? @relation(fields: [conversation_id], references: [id])
+  id           String        @id @default(uuid())
 
-  id              String        @id @default(uuid())
-  Conversation    Conversation? @relation(fields: [conversation_id], references: [id])
   conversation_id String?
   user_id         String
 }
@@ -242,6 +257,11 @@ model Chat {
 enum sex_type {
   M
   F
+}
+
+enum selling_option {
+  ORIGINAL
+  PRINT
 }
 
 enum user_role {

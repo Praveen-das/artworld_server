@@ -19,15 +19,21 @@ const {
   addToRV,
 
   addSocialMediaLink,
-  removeSocialMediaLink
+  removeSocialMediaLink,
+
+  getArtists,
+  addFollower,
+  removeFollower
 } = userController
 
 const { fetchAdminProducts } = productController
 
 const userRouter = express.Router();
 
-
 userRouter.get("/", (req, res) => res.send(req.user));
+userRouter.get("/artists", getArtists);
+userRouter.post("/artists/follow/:id", addFollower);
+userRouter.delete("/artists/unfollow/:id", removeFollower);
 userRouter.put("/update", updateUser);
 userRouter.post("/signup", signupUser);
 userRouter.post("/signin", passport.authenticate("local"), signinUser);
