@@ -131,8 +131,6 @@ function initializeSocket(server: any) {
 
         ////////////////////////////////////////////////
         socket.on('disconnect', (reason: any) => {
-            console.log('disconnected');
-
             const lastActive = new Date().getTime()
             const user = users.get(socket.user.user_id)
             user.lastActive = lastActive

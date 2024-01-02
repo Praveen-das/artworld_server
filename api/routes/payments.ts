@@ -3,10 +3,11 @@ import controller from '../controller/razorpayController'
 
 const router = express.Router()
 
-const { createOrder, createSubscription, verifySubscription } = controller
+const { createOrder, verify, getLinkedAccounts, createLinkedAccount } = controller
 
+router.get('/accounts', getLinkedAccounts)
+router.post('/accounts', createLinkedAccount)
 router.post('/orders', createOrder)
-router.post('/subscriptions/create', createSubscription)
-router.post('/subscriptions/verify', verifySubscription)
+router.post('/verify', verify)
 
 export default router

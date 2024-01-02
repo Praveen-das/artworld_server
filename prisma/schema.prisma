@@ -6,24 +6,27 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  // shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
-  displayName     String
-  about           String?
-  email           String?
-  password        String?
-  photo           String?
-  provider        provider_type @default(web)
-  default_address String?
-  createdAt       DateTime      @default(dbgenerated("NOW()"))
-  cart            cart_item[]
-  social          Social[]
-  role            user_role     @default(user)
-  id              String        @id @unique @default(uuid())
+  displayName    String
+  bio            String?
+  email          String?
+  phoneNumber    String?         @db.VarChar(10)
+  password       String?
+  photo          String?
+  provider       provider_type   @default(web)
+  createdAt      DateTime        @default(dbgenerated("NOW()"))
+  cart           cart_item[]
+  social         Social[]
+  linked_account linked_account?
+  role           user_role       @default(user)
+  id             String          @id @unique @default(uuid())
 
-  address                                     Address[]
+  address            Address[] @relation("UserToHaveAddressCollection")
+  default_address    Address?  @relation("user_default_address", fields: [default_address_id], references: [id])
+  default_address_id String?   @unique
+
   product                                     Product[]
   wishlist                                    wishlist[]
   reviews                                     Reviews[]
@@ -36,6 +39,15 @@ model User {
   following                                   Followers[]       @relation("following")
 
   @@unique([email, provider])
+}
+
+model linked_account {
+  id        String                @id @unique @default(uuid())
+  status    linked_account_status @default(not_active)
+  accountId String
+  
+  user      User                  @relation(fields: [userId], references: [id])
+  userId    String                @unique
 }
 
 model Followers {
@@ -67,19 +79,20 @@ model UserVerificationRecords {
 }
 
 model Address {
-  name            String   @db.VarChar(60)
-  address         String
-  city            String   @db.VarChar(40)
-  state           String   @db.VarChar(20)
-  pincode         Int
-  email           String
-  createdAt       DateTime @default(dbgenerated("NOW()"))
-  mobile          Int
-  alternate_phone Int?
-  id              String   @id @default(uuid())
+  name      String   @db.VarChar(60)
+  address   String
+  city      String   @db.VarChar(40)
+  state     String   @db.VarChar(20)
+  pincode   String   @db.VarChar(6)
+  createdAt DateTime @default(dbgenerated("NOW()"))
+  mobile    String   @db.VarChar(10)
+  id        String   @id @default(uuid())
 
-  user    User   @relation(fields: [user_id], references: [id])
-  user_id String
+  // userToHaveDefaultAddress    User   @relation("user_default_address", fields: [userId], references: [id])
+  // userIdForDefaultAddress     String @unique
+  UserToHaveAddressCollection User   @relation("UserToHaveAddressCollection", fields: [user_id], references: [id])
+  user_id                     String
+  User                        User[] @relation("user_default_address")
 }
 
 //-----------------product schema-----------------//
@@ -264,9 +277,15 @@ enum selling_option {
   PRINT
 }
 
+enum linked_account_status {
+  not_active
+  active
+  inactive
+}
+
 enum user_role {
-  seller
   user
+  seller
 }
 
 enum payment_type {
