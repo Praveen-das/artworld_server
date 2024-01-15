@@ -18,7 +18,7 @@ import {
 
 import bcrypt from "bcrypt";
 import passport from "passport";
-import { sendMail } from "../services/nodeMailer";
+import { sendOrderConfirmationMail } from "../services/nodeMailer";
 import { generateToken, verifyToken } from "../services/jwt";
 import { prismaErrorHandler } from "../utils/PrismaErrorHandler";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
@@ -38,7 +38,7 @@ const getUserById = async (req: any, res: any, next: any) => {
       data.isFollowedByCurrentUser = isFollowed
       res.json(data)
     })
-    .catch((err) => next(err));
+    .catch((err) => console.log(err));
 }
 
 const signupUser = async (req: any, res: any, next: any) => {
@@ -112,7 +112,7 @@ const sendEmailVerification = async (req: any, res: any, next: any) => {
   const token = generateToken({ ...payload, user_id: req.user?.id });
 
   // await setUserVerificationRecord(user_id, token);
-  sendMail(token);
+  // sendMail(token);
 };
 
 const confirmVerification = async (req: any, res: any, next: any) => {
@@ -133,24 +133,21 @@ const addUserAddress = async (req: any, res: any, next: any) => {
   const address = req.body;
 
   address["user_id"] = userId;
-  let isDefault = address.isDefault
 
-  try {
-    delete address.isDefault
+  delete address.isDefault
 
-    _addUserAddress(address)
-      .then(async (data: any) => {
-        if (isDefault) await _updateUser(userId, { default_address_id: data.id })
-        res.json(data)
-      })
-      .catch((err) => {
-        if (err instanceof PrismaClientKnownRequestError)
-          return prismaErrorHandler(err, next);
-        next(err);
-      });
-  } catch (error) {
-    next(error);
-  }
+  _addUserAddress(address)
+    .then(async (data: any) => {
+      _updateUser(userId, { default_address_id: data.id })
+      res.json(data)
+    })
+    .catch((err) => {
+      console.log(err);
+
+      if (err instanceof PrismaClientKnownRequestError)
+        err = prismaErrorHandler(err, next)
+      res.status(err.code).send(err.error);
+    });
 };
 
 const updateUserAddress = async (req: any, res: any, next: any) => {
@@ -161,8 +158,8 @@ const updateUserAddress = async (req: any, res: any, next: any) => {
       .then((data) => res.json(data))
       .catch((err) => {
         if (err instanceof PrismaClientKnownRequestError)
-          return prismaErrorHandler(err, next);
-        next(err);
+          err = prismaErrorHandler(err, next)
+        res.status(err.code).send(err.error);
       });
   } catch (error) {
     next(error);

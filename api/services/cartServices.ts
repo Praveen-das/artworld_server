@@ -7,7 +7,7 @@ const _fetchUserCart = async (user_id: string) => {
             where: { user_id },
             include: {
                 product: {
-                    include: { sales_person: true }
+                    include: { sales_person: { include: { linked_account: true } } }
                 }
             },
             orderBy: { createdAt: 'desc' }
@@ -25,9 +25,10 @@ const _fetchUserCart = async (user_id: string) => {
     ])
 
     const total_price = data[1]._sum.price
+    const total_discount = data[1]._sum.discount
     const count = data[1]._count.id
 
-    return [data[0], { total_price, count }]
+    return [data[0], { total_price, total_discount, count }]
 }
 
 const _addToCart = async (payload: any) => {

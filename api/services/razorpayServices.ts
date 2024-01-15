@@ -3,6 +3,12 @@ import crypto from 'crypto'
 import { _updateUser } from './userServices';
 import axiosClient from './libs/axiosClient';
 import db from "../config/prismaClient";
+import { Transfer } from '../types/razorpay';
+import { _createSalesOrder } from './salesOrderServices';
+import cartServices from '../services/cartServices'
+
+const { _fetchUserCart } = cartServices
+
 
 const rzp = new Razorpay(
     {
@@ -10,12 +16,11 @@ const rzp = new Razorpay(
         key_secret: process.env.RAZORPAY_KEY_SECRET!
     })
 
-const rzp_store = new Map()
 
-export async function _createOrder() {
+export async function _createOrderForSellerRegistration() {
+    const currency = 'INR'
     const payment_capture = 1
     const amount = 799
-    const currency = 'INR'
 
     const options = {
         amount: amount * 100,
@@ -27,21 +32,35 @@ export async function _createOrder() {
     return await rzp.orders.create(options)
 }
 
-export async function _verify(userId: string, res: any) {
-    const payment_id = res.razorpay_payment_id
-    const order_id = res.razorpay_order_id
-    const razorpay_signature = res.razorpay_signature
+export async function _createOrderAndTransferAmount(transfers: Transfer) {
+    const currency = 'INR'
+    const payment_capture = 1
+    const amount = 799
+
+    const options = {
+        amount: transfers.total_amount * 100,
+        currency,
+        receipt: crypto.randomUUID(),
+        payment_capture,
+        transfers: transfers.accounts
+    }
+
+    return await rzp.orders.create(options)
+}
+
+export async function _verify(data: any) {
+    const razorpay_signature = data.razorpay_signature
     const key_secret = process.env.RAZORPAY_KEY_SECRET!
+    const payment_id = data.razorpay_payment_id
+    const order_id = data.razorpay_order_id
+
 
     const crypt = crypto.createHmac('sha256', key_secret)
     crypt.update(order_id + '|' + payment_id)
     const digest = crypt.digest('hex');
 
-    if (digest === razorpay_signature) {
-        return await _updateUser(userId, { role: 'seller' })
-    } else {
-        throw 'Signature mismatch.'
-    }
+    if (digest === razorpay_signature) return true
+    throw 'Signature mismatch.'
 }
 
 export async function _getLinkedAccounts() {
