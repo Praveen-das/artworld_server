@@ -14,12 +14,12 @@ import {
   _getArtists,
   _addFollower,
   _removeFollower,
-} from "../Services/userServices";
+} from "../services/userServices";
 
 import bcrypt from "bcrypt";
 import passport from "passport";
-import { sendOrderConfirmationMail } from "../Services/nodeMailer";
-import { generateToken, verifyToken } from "../Services/jwt";
+import { sendOrderConfirmationMail } from "../services/nodeMailer";
+import { generateToken, verifyToken } from "../services/jwt";
 import { prismaErrorHandler } from "../utils/PrismaErrorHandler";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import ioredis from "../config/Redis";
