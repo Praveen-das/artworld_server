@@ -1,7 +1,6 @@
-const allowedOrigins =
-    [
-        "http://localhost:3000",
-        "https://artworld-nine.vercel.app",
-    ]
+const allowedOrigins = [
+    'https://artworld-nine.vercel.app',
+    'http://localhost:3000'
+]
 
 export default allowedOrigins

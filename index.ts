@@ -18,6 +18,7 @@ import payments from "./api/routes/payments";
 import salesOrder from "./api/routes/salesOrder";
 import initializeSocket from './api/services/socketIO'
 import { checkAuth } from "./api/middleware/authentication";
+import { SERVER_URL } from "./api/utils/urls";
 
 
 const app = express();
@@ -48,9 +49,7 @@ app.use(passport.session());
 
 // /*----------->> ROUTERS <<-----------*/
 
-
 app.use('/', root)
-app.get('/env', (_, res) => res.send(process.env.NODE_ENV || 'not set'))
 app.use("/products", productRouter);
 app.use("/reviews", userReviews);
 app.use("/user", userRouter);

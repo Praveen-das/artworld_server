@@ -1,4 +1,5 @@
 import { Server } from 'socket.io'
+import { SERVER_URL } from '../utils/urls'
 
 let users: any = new Map()
 let store: any = new Map()
@@ -15,15 +16,14 @@ interface chat_schema {
     status: string,
 }
 
+const origin = [
+    'https://artworld-nine.vercel.app',
+    'http://localhost:3000'
+]
+
 function initializeSocket(server: any) {
     const io = new Server(server, {
-        cors: {
-            origin:
-                [
-                    "http://localhost:3000",
-                    // "https://artworld-nine.vercel.app"
-                ]
-        },
+        cors: { origin },
         connectionStateRecovery: {
             maxDisconnectionDuration: 2 * 60 * 1000,
             skipMiddlewares: true,
@@ -64,7 +64,7 @@ function initializeSocket(server: any) {
             requests: requests ? Array.from(requests) : [],
             blockedUsers
         })
-        
+
         socket.broadcast.emit("user connected", user);
 
         socket.on('user_chat', (chat: chat_schema) => {

@@ -1,4 +1,5 @@
 import passport from "passport";
+import { SERVER_URL } from "../utils/urls";
 
 //------------------------GOOGLE------------------------//
 
@@ -10,8 +11,8 @@ const googleAuth = (req: any, res: any, next: any) => {
 
 const googleAuthRedirect = (req: any, res: any, next: any) => {
   return passport.authenticate("google", {
-    successRedirect: "http://localhost:3000",
-    failureRedirect: "http://localhost:3000/login",
+    successRedirect: SERVER_URL,
+    failureRedirect: `${SERVER_URL}/login`,
   })(req, res, next);
 };
 
@@ -25,8 +26,8 @@ const facebookAuth = (req: any, res: any, next: any) => {
 
 const facebookAuthRedirect = (req: any, res: any, next: any) => {
   return passport.authenticate("facebook", {
-    successRedirect: "http://localhost:3000",
-    failureRedirect: "http://localhost:3000/login",
+    successRedirect: SERVER_URL,
+    failureRedirect: `${SERVER_URL}/login`,
   })(req, res, next);
 };
 
