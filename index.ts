@@ -24,7 +24,7 @@ const app = express();
 initializePassport(passport);
 
 // /*----------->> MIDDLEWARES <<-----------*/
-app.use('/', express.static(path.join(__dirname, '/public')))
+// app.use('/', express.static(path.join(__dirname, '/public')))
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,6 +44,9 @@ app.use(sessionMW);
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+console.log();
+
 
 // /*----------->> ROUTERS <<-----------*/
 
