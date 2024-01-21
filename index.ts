@@ -33,10 +33,10 @@ const sessionMW = session({
   secret: "keyboard cat",
   resave: false,
   saveUninitialized: false,
-  // cookie: {
-  //   sameSite: 'none',
-  //   secure: true,
-  // }
+  cookie: {
+    sameSite: 'none',
+    secure: true,
+  }
 })
 
 app.set('trust proxy', 1)
@@ -45,8 +45,7 @@ app.use(sessionMW);
 app.use(passport.initialize());
 app.use(passport.session());
 
-console.log();
-
+console.log(process.env.SSL_CA);
 
 // /*----------->> ROUTERS <<-----------*/
 
