@@ -2,7 +2,7 @@ import {
   _addUserAddress,
   _deleteUserAddress,
   _updateUserAddress,
-  _signupUser,
+  _createUser,
   _updateUser,
   _addToWishlist,
   _removeFromlist,
@@ -14,12 +14,12 @@ import {
   _getArtists,
   _addFollower,
   _removeFollower,
-} from "../services/userServices";
+} from "../Services/userServices";
 
 import bcrypt from "bcrypt";
 import passport from "passport";
-import { sendOrderConfirmationMail } from "../services/nodeMailer";
-import { generateToken, verifyToken } from "../services/jwt";
+import { sendOrderConfirmationMail } from "../Services/nodeMailer";
+import { generateToken, verifyToken } from "../Services/jwt";
 import { prismaErrorHandler } from "../utils/PrismaErrorHandler";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import ioredis from "../config/Redis";
@@ -41,14 +41,14 @@ const getUserById = async (req: any, res: any, next: any) => {
     .catch((err) => console.log(err));
 }
 
-const signupUser = async (req: any, res: any, next: any) => {
+const createUser = async (req: any, res: any, next: any) => {
   const credentials = req.body;
 
   const hashPass = await hashPassword(req.body.password);
 
   credentials.password = hashPass;
 
-  _signupUser(credentials)
+  _createUser(credentials)
     .then((data) => res.json(data))
     .catch((err) => {
       prismaErrorHandler(err, next);
@@ -268,7 +268,7 @@ const removeFollower = async (req: any, res: any, next: any) => {
 
 export default {
   getUserById,
-  signupUser,
+  createUser,
   signinUser,
   logoutUser,
   sendEmailVerification,

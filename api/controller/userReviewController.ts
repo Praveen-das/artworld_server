@@ -1,5 +1,5 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import services from "../services/userReviewServices";
+import services from "../Services/userReviewServices";
 import { prismaErrorHandler } from "../utils/PrismaErrorHandler";
 
 const {

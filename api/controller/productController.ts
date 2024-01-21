@@ -9,7 +9,7 @@ import {
   _fetchFilterParams,
   // _fetchCategories,
   _fetchTopSellingProducts
-} from "../services/productServices";
+} from "../Services/productServices";
 import QueryValidator from './Utils/QueryValidator'
 
 const fetchProducts = (req: any, res: any, next: any) => {
@@ -27,9 +27,9 @@ const fetchTopSellingProducts = (req: any, res: any, next: any) => {
     .catch(next);
 };
 
-const fetchFilterParams = (req: any, res: any, next: any) => {  
+const fetchFilterParams = (req: any, res: any, next: any) => {
   let query = QueryValidator(req.query)
-  
+
   _fetchFilterParams(query)
     .then((data) => res.send(data))
     .catch(next);
@@ -45,8 +45,10 @@ const fetchFilterParams = (req: any, res: any, next: any) => {
 
 const fetchAdminProducts = (req: any, res: any, next: any) => {
   let query = QueryValidator(req.query)
-  
+
   const userId = req.user?.id || null
+
+  if (!userId) return res.send([])
 
   _fetchAdminProducts(userId, query)
     .then((data) => res.status(200).send(data))

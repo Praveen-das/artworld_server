@@ -1,4 +1,4 @@
-import { _createSalesOrder, _getOrdersByUserId, _getSalesOrderByUserId, _updateOrder } from "../services/salesOrderServices"
+import { _createSalesOrder, _getOrdersByUserId, _getSalesOrderByUserId, _updateOrder } from "../Services/salesOrderServices"
 
 function createSalesOrder(req: any, res: any, next: any) {
     const { cart_items } = req.body

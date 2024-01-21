@@ -6,7 +6,7 @@ const imagekit = new ImageKit({
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
 });
 
-function _imageKit(_: any, res: any) {
+function _imageKitGetAuth(_: any, res: any) {
   var result = imagekit.getAuthenticationParameters();
   res.send(result);
 }
@@ -30,4 +30,4 @@ async function _deleteFile(req: any, res: any, next: any) {
     .catch((err) => console.log(err))
 }
 
-export { _imageKit, _deleteFile };
+export { _imageKitGetAuth, _deleteFile };
