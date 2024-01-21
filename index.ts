@@ -9,14 +9,14 @@ import root from './api/root'
 import userRouter from "./api/routes/userRouter";
 import productRouter from "./api/routes/products";
 import imageKitRouter from "./api/routes/imageKit";
-import initializePassport from "./api/Services/passport";
+import initializePassport from "./api/services/passport";
 import passport from "passport";
 import authenticationRouter from "./api/routes/OAuthRouter";
 import userCart from "./api/routes/userCart";
 import userReviews from "./api/routes/userReviews";
 import payments from "./api/routes/payments";
 import salesOrder from "./api/routes/salesOrder";
-import initializeSocket from './api/Services/socketIO'
+import initializeSocket from './api/services/socketIO'
 import { checkAuth } from "./api/middleware/authentication";
 
 const app = express();
