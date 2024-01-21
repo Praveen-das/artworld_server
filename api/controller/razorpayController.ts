@@ -2,8 +2,8 @@ import { _createLinkedAccount, _createOrderAndTransferAmount, _createOrderForSel
 import { _updateUser } from "../services/userServices";
 import { Transfer } from "../types/razorpay";
 import cartServices from '../services/cartServices'
-import { _createSalesOrder } from "../services/salesOrderServices";
 import { sendOrderConfirmationMail } from "../services/nodeMailer";
+import { _createSalesOrder } from "../services/salesOrderServices";
 
 const { _fetchUserCart } = cartServices
 
