@@ -57,7 +57,7 @@ app.use("/user", userRouter);
 app.use("/auth", authenticationRouter);
 app.use("/imagekit", imageKitRouter);
 
-app.use(checkAuth)
+// app.use(checkAuth)
 
 app.get("/health", (_, res) => res.send('ok'));
 app.use("/cart", userCart);
