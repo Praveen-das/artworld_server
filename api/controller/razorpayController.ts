@@ -4,7 +4,7 @@ import { Transfer } from "../types/razorpay";
 import cartServices from '../services/cartServices'
 import { sendOrderConfirmationMail } from "../services/nodeMailer";
 import { _createSalesOrder } from "../services/salesOrderServices";
-import { SERVER_URL } from "../utils/urls";
+import { CLIENT_URL } from "../utils/urls";
 
 const { _fetchUserCart } = cartServices
 
@@ -53,9 +53,9 @@ async function verifyRegistration(req: any, res: any, next: any) {
     _verify(req.body)
         .then(async () => {
             await _updateUser(userId, { role: 'seller' })
-            res.redirect(`${SERVER_URL}/seller/onboarding`)
+            res.redirect(`${CLIENT_URL}/seller/onboarding`)
         })
-        .catch(err => res.redirect(`${SERVER_URL}/seller/failed`))
+        .catch(err => res.redirect(`${CLIENT_URL}/seller/failed`))
 }
 
 async function createSalesOrder(userId: string) {
@@ -82,11 +82,11 @@ async function verifyPurchase(req: any, res: any, next: any) {
         .then(async () => {
             await createSalesOrder(userId)
             await sendOrderConfirmationMail({ username: req.user.displayName })
-            res.redirect(`${SERVER_URL}/purchase/success`)
+            res.redirect(`${CLIENT_URL}/purchase/success`)
         })
         .catch((err) => {
             console.log(err);
-            res.redirect(`${SERVER_URL}/seller/failed`)
+            res.redirect(`${CLIENT_URL}/seller/failed`)
         })
 }
 

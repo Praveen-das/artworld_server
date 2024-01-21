@@ -1,5 +1,4 @@
 import { Server } from 'socket.io'
-import { SERVER_URL } from '../utils/urls'
 
 let users: any = new Map()
 let store: any = new Map()
