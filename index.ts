@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import session from "express-session";
+import session, { SessionOptions } from "express-session";
 import path from 'path'
 
 import corsOptions from "./api/config/cors/corsOptions";
@@ -29,14 +29,18 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const cookieOptions: any =
+  process.env.NODE_ENV === 'production' ?
+    {
+      sameSite: 'none',
+      secure: true,
+    } : {}
+
 const sessionMW = session({
   secret: "keyboard cat",
   resave: false,
   saveUninitialized: false,
-  // cookie: {
-  //   sameSite: 'none',
-  //   secure: true,
-  // }
+  cookie: cookieOptions
 })
 
 app.set('trust proxy', 1)
