@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "outDir": "dist",
+    "outDir": "build",
     "strict": true,
     "lib": [
-      "esnext"
+      "esnext",
+      "es2016",
+      "dom" 
     ],
     "esModuleInterop": true,
   }

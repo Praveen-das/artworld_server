@@ -24,7 +24,7 @@ const app = express();
 initializePassport(passport);
 
 // /*----------->> MIDDLEWARES <<-----------*/
-// app.use('/', express.static(path.join(__dirname, '/public')))
+app.use('/', express.static(path.join(__dirname, '/public')))
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -33,10 +33,10 @@ const sessionMW = session({
   secret: "keyboard cat",
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    sameSite: 'none',
-    secure: true,
-  }
+  // cookie: {
+  //   sameSite: 'none',
+  //   secure: true,
+  // }
 })
 
 app.set('trust proxy', 1)
@@ -45,28 +45,23 @@ app.use(sessionMW);
 app.use(passport.initialize());
 app.use(passport.session());
 
-console.log(process.env.SSL_CA);
-
 // /*----------->> ROUTERS <<-----------*/
 
 app.use('/', root)
 app.use("/products", productRouter);
 app.use("/reviews", userReviews);
 app.use("/user", userRouter);
-app.use("/auth", authenticationRouter);
-app.use("/imagekit", imageKitRouter);
-
-// app.use(checkAuth)
-
 app.get("/health", (_, res) => res.send('ok'));
-app.use("/cart", userCart);
-app.use("/rzp", payments);
-app.use("/orders", salesOrder);
+app.use("/auth", authenticationRouter);
+
+app.use("/imagekit", checkAuth, imageKitRouter);
+app.use("/cart", checkAuth, userCart);
+app.use("/rzp", checkAuth, payments);
+app.use("/orders", checkAuth, salesOrder);
 
 app.all('*', (_, res) => {
-  res.sendFile(path.join(__dirname, 'views', '404.html'))
+  res.sendFile('404.html', { root: './public' })
 })
-
 
 /*----------->> ERROR HANDLER <<-----------*/
 

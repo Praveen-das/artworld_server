@@ -16,7 +16,7 @@ import {
   _removeFollower,
 } from "../services/userServices";
 
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import passport from "passport";
 import { sendOrderConfirmationMail } from "../services/nodeMailer";
 import { generateToken, verifyToken } from "../services/jwt";
