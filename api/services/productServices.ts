@@ -35,6 +35,22 @@ const select = {
   id: true,
 };
 
+const group: any = [
+  "name",
+  "desc",
+  "material_id",
+  "category_id",
+  "size",
+  "quantity",
+  "price",
+  "discount",
+  "images",
+  // "reviews",
+  "createdAt",
+  // "seles_person",
+  "id",
+];
+
 const _fetchProducts = async (
   sort: sortInterface,
   { price_range = {}, ...product }: any, ////destructure price range from facets and assign rest to product
@@ -45,7 +61,7 @@ const _fetchProducts = async (
   price_range.lt = lt && parseInt(lt) + 1; //parse price range to integer
   price_range.gt = gt && parseInt(gt) - 1; //parse price range to integer
 
-  const data = await db.product.findMany({
+  const products = await db.product.findMany({
     where: {
       ...product,
       price: { ...price_range },
@@ -55,7 +71,10 @@ const _fetchProducts = async (
     take: limit,
     orderBy: { [sort.item]: sort.method },
   });
-  return data;
+
+  const count = await db.product.count({ select: { id: true } });
+
+  return { products, count: count.id };
 };
 
 const _fetchProductById = async (id: string) => {
