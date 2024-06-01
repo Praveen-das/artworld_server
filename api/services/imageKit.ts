@@ -11,11 +11,12 @@ function _imageKit(_: any, res: any) {
   res.send(result);
 }
 
-function _deleteFile(req: any) {
-  const fileId = req.params;
-  imagekit.deleteFile(fileId, function (error, result) {
-    if (error) console.log(error);
-    else console.log(result);
+async function _deleteFile(req: any, res: any, next: any) {
+  const fileId = req.params.id;
+
+  imagekit.deleteFile(fileId, (error) => {
+    if (error) res.status(404).send(error);
+    else res.json("file removed");
   });
 }
 

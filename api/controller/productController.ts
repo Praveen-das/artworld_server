@@ -8,7 +8,7 @@ import {
 } from "../services/productServices";
 
 const fetchProducts = (req: any, res: any, next: any) => {
-  const SORT_DEFAULTS = "name_asc";
+  const SORT_DEFAULTS = "createdAt_desc";
   const DEFAULT_PAGE = 1;
   const DEFAULT_LIMIT = 10;
 
@@ -46,6 +46,7 @@ const searchProductByName = (req: any, res: any, next: any) => {
 
 const addProduct = async (req: any, res: any, next: any) => {
   const product = req.body;
+
   _addProduct(product)
     .then((data) => res.status(200).send(data))
     .catch(next);
