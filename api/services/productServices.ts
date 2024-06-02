@@ -61,20 +61,21 @@ const _fetchProducts = async (
   price_range.lt = lt && parseInt(lt) + 1; //parse price range to integer
   price_range.gt = gt && parseInt(gt) - 1; //parse price range to integer
 
-  const products = await db.product.findMany({
-    where: {
-      ...product,
-      price: { ...price_range },
-    },
-    select,
-    skip: (page - 1) * limit,
-    take: limit,
-    orderBy: { [sort.item]: sort.method },
-  });
+  const data = await db.$transaction([
+    db.product.findMany({
+      where: {
+        ...product,
+        price: { ...price_range },
+      },
+      select,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { [sort.item]: sort.method },
+    }),
+    db.product.count({ select: { id: true } }),
+  ]);
 
-  const count = await db.product.count({ select: { id: true } });
-
-  return { products, count: count.id };
+  return data;
 };
 
 const _fetchProductById = async (id: string) => {
