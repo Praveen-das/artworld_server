@@ -34,13 +34,14 @@ const select = {
   reviews: true,
   createdAt: true,
   seles_person: true,
+  defaultImage: true,
   id: true,
 };
 
 const _fetchProducts = async (
   sort: sortInterface,
   { price_range = {}, ...product }: any, ////destructure price range from facets and assign rest to product
-  q: any,
+  search: any,
   page: number,
   limit: number
 ) => {
@@ -52,8 +53,9 @@ const _fetchProducts = async (
     db.product.findMany({
       where: {
         ...product,
-        ...q,
+        ...search,
         price: { ...price_range },
+        
       },
       select,
       skip: (page - 1) * limit,
@@ -62,7 +64,7 @@ const _fetchProducts = async (
     }),
     db.product.count({
       select: { id: true },
-      where: { ...product, ...q, price: { ...price_range } },
+      where: { ...product, ...search, price: { ...price_range } },
     }),
   ]);
 
