@@ -24,9 +24,15 @@ model User {
   sales_order_personTosales_order_seller_id   sales_order[] @relation("personTosales_order_seller_id")
 }
 
+model UserVerificationRecords {
+  user_id String
+  token   String
+  id      Int    @id @default(autoincrement())
+}
+
 model Address {
   name            String  @db.VarChar(60)
-  address         String  
+  address         String
   city            String  @db.VarChar(40)
   state           String  @db.VarChar(20)
   pincode         Int
