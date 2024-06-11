@@ -21,12 +21,15 @@ userRouter.post("/logout", logoutUser);
 userRouter.post("/emailverification", sendEmailVerification);
 userRouter.get("/verify", confirmVerification);
 
-
 /*---------------------->> ERROR HANDLER <<----------------------*/
 
-userRouter.use((err: any, _: any, res: any, next: any) => {
-  console.log("ERROR HANDLER", err);
-  res.status(err.code).send(err.error);
+userRouter.use((err: any, req: any, res: any, next: any) => {
+  console.log("req");
+
+  if (err) {
+    console.log("ERROR HANDLER", err);
+    res.status(err.code).send(err.error);
+  }
 });
 
 export default userRouter;

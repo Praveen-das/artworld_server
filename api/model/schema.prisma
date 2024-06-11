@@ -11,11 +11,11 @@ datasource db {
 // tables///////////////////////////////////////////////////////////////////////
 
 model User {
-  displayName String?
-  username    String  @unique
-  email       String  @unique
-  password    String
-  id          String  @id @unique @default(uuid())
+  displayName String
+  email       String @unique
+  password    String?
+  photo       String?
+  id          String @id @unique @default(uuid())
 
   address                                     Address[]
   product                                     Product[]
