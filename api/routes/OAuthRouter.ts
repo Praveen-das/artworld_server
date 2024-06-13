@@ -1,29 +1,35 @@
 import express from "express";
 import passport from "passport";
+import {
+  facebookAuth,
+  facebookAuthRedirect,
+  googleAuth,
+  googleAuthRedirect,
+} from "../controller/oAuthController";
 
 const authRouter = express.Router();
 
 //------------------------GOOGLE------------------------//
 
-authRouter.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"]
-  })
-);
+authRouter.get("/google", googleAuth);
+
+authRouter.get("/google/redirect", googleAuthRedirect);
+
+//------------------------FACEBOOK------------------------//
+authRouter.get("/facebook", facebookAuth);
+
+authRouter.get("/facebook/redirect", facebookAuthRedirect);
+
+//------------------------TWITTER------------------------//
+authRouter.get("/twitter", passport.authenticate("twitter"));
 
 authRouter.get(
-  "/google/redirect",
-  passport.authenticate("google", { failureRedirect: "/login" }),
-  (req, res) => {
-    console.log("google authed");
-
+  "/twitter/redirect",
+  passport.authenticate("twitter", { failureRedirect: "/login" }),
+  function (req, res) {
     // Successful authentication, redirect home.
-    res.send("ok");
+    res.redirect("/");
   }
 );
-
-authRouter.get("/facebook");
-authRouter.get("/twitter");
 
 export default authRouter;

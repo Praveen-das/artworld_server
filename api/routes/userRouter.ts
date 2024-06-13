@@ -9,23 +9,21 @@ import {
   sendEmailVerification,
   confirmVerification,
 } from "../controller/userController";
-import { auth } from "../services/global";
+import { auth } from "../services/globalServices";
 
 const userRouter = express.Router();
 
-userRouter.get("/", (req: any, res: any) => res.json(req.user));
+userRouter.get("/", auth, (req, res) => res.json(req.user));
 userRouter.put("/", updateUser);
 userRouter.post("/signup", signupUser);
 userRouter.post("/signin", passport.authenticate("local"), signinUser);
-userRouter.post("/logout", logoutUser);
+userRouter.get("/logout", logoutUser);
 userRouter.post("/emailverification", sendEmailVerification);
 userRouter.get("/verify", confirmVerification);
 
 /*---------------------->> ERROR HANDLER <<----------------------*/
 
 userRouter.use((err: any, req: any, res: any, next: any) => {
-  console.log("req");
-
   if (err) {
     console.log("ERROR HANDLER", err);
     res.status(err.code).send(err.error);

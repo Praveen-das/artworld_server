@@ -1,4 +1,8 @@
-import { _signupUser, _updateUser } from "../services/userServices";
+import {
+  _addUserAddress,
+  _signupUser,
+  _updateUser,
+} from "../services/userServices";
 import bcrypt from "bcrypt";
 import passport from "passport";
 import { sendMail } from "../services/nodeMailer";
@@ -84,11 +88,26 @@ const confirmVerification = async (req: any, res: any, next: any) => {
   try {
     const isVerified = await verifyToken(req.query.token);
     if (isVerified) {
-      console.log('verified and calling next');
-
+      console.log("verified and calling next");
     } else {
       console.log(isVerified);
     }
+  } catch (error) {
+    next(error);
+  }
+};
+const addUserAddress = async (req: any, res: any, next: any) => {
+  const userId = req.user.id;
+  const address = req.body;
+
+  try {
+    address["user_id"] = userId;
+    _addUserAddress(address)
+      .then((data) => res.json(data))
+      .catch((err) => {
+        prismaErrorHandler(err, next);
+        next(err);
+      });
   } catch (error) {
     next(error);
   }
