@@ -9,7 +9,7 @@ const initializePassport = (passport: any) => {
   passport.use(localStrategy());
   passport.use(googleStrategy());
   passport.use(facebookStrategy());
-  passport.use(twitterStrategy());
+  // passport.use(twitterStrategy());
 
   passport.serializeUser((user: any, done: any) => {
     return done(null, user.id);
@@ -64,7 +64,8 @@ function googleStrategy() {
     },
     async (_, __, profile, done) => {
       const user = await getUserById(profile.id);
-
+      console.log(user);
+      
       if (!user) {
         _signupUser({
           displayName: profile.displayName,
@@ -116,16 +117,16 @@ function facebookStrategy() {
 }
 
 function twitterStrategy() {
-  return new TwitterStrategy(
-    {
-      consumerKey: process.env.TWITTER_CLIENT_ID!,
-      consumerSecret: process.env.TWITTER_CLIENT_SECRET!,
-      callbackURL: "/auth/twitter/redirect",
-    },
-    function (_, __, profile, done) {
-      console.log(profile);
-    }
-  );
+  // return new TwitterStrategy(
+  //   {
+  //     consumerKey: process.env.TWITTER_CLIENT_ID!,
+  //     consumerSecret: process.env.TWITTER_CLIENT_SECRET!,
+  //     callbackURL: "/auth/twitter/redirect",
+  //   },
+  //   function (_, __, profile, done) {
+  //     console.log(profile);
+  //   }
+  // );
 }
 
 export default initializePassport;

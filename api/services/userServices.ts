@@ -24,7 +24,6 @@ const getUserById = async (id: string) => {
       address: true,
     },
   });
-  console.log(data);
 
   return data;
 };
@@ -38,9 +37,19 @@ const _updateUser = async (id: string, updates: any) => {
 };
 
 const _addUserAddress = async (address: any) => {
-  const data = await db.address.create({ data: address });
-  return data;
+  try {
+    const data = await db.address.create({ data: address });
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
 };
+
+const _updateUserAddress = async (id: string, address: any) => {
+  // const data = await db.address.update({ data: address, where: { id } });
+  // return data;
+};
+
 
 export {
   _signupUser,

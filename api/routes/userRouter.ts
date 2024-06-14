@@ -8,6 +8,7 @@ import {
   updateUser,
   sendEmailVerification,
   confirmVerification,
+  addUserAddress,
 } from "../controller/userController";
 import { auth } from "../services/globalServices";
 
@@ -20,6 +21,8 @@ userRouter.post("/signin", passport.authenticate("local"), signinUser);
 userRouter.get("/logout", logoutUser);
 userRouter.post("/emailverification", sendEmailVerification);
 userRouter.get("/verify", confirmVerification);
+userRouter.post("/address", addUserAddress);
+userRouter.put("/address", addUserAddress);
 
 /*---------------------->> ERROR HANDLER <<----------------------*/
 
