@@ -1,5 +1,6 @@
 import {
   _fetchProducts,
+  _fetchAdminProducts,
   _addProduct,
   _removeProduct,
   _updateProduct,
@@ -21,7 +22,7 @@ const fetchProducts = (req: any, res: any, next: any) => {
   } = req.query;
 
   let search
-  
+
   if (query) {
     search = {
       name: {
@@ -32,7 +33,7 @@ const fetchProducts = (req: any, res: any, next: any) => {
       },
     }
   }
-  
+
   const [item, method] = sort?.split("_");
   const sortingConstraints = { item, method };
 
@@ -44,8 +45,41 @@ const fetchProducts = (req: any, res: any, next: any) => {
     .catch(next);
 };
 
+const fetchAdminProducts = (req: any, res: any, next: any) => {
+  const DEFAULT_PAGE = 1;
+  const DEFAULT_LIMIT = 10;
+  const userId = req.user.id
+
+  let {
+    page = DEFAULT_PAGE,
+    limit = DEFAULT_LIMIT,
+    query,
+  } = req.query;
+
+  let search
+
+  if (query) {
+    search = {
+      name: {
+        search: query
+      },
+      id: {
+        search: query
+      },
+    }
+  }
+
+  limit = parseInt(limit);
+  page = parseInt(page);
+
+  _fetchAdminProducts(userId, search, page, limit)
+    .then((data) => res.status(200).send(data))
+    .catch(next);
+};
+
 const fetchProductById = (req: any, res: any, next: any) => {
   const { id } = req.params;
+
   _fetchProductById(id)
     .then((data) => res.status(200).send(data))
     .catch(next);
@@ -60,6 +94,7 @@ const searchProductByName = (req: any, res: any, next: any) => {
 
 const addProduct = async (req: any, res: any, next: any) => {
   const product = req.body;
+  product['sales_person_id'] = req.user.id
 
   _addProduct(product)
     .then((data) => res.status(200).send(data))
@@ -85,6 +120,7 @@ const updateProduct = async (req: any, res: any, next: any) => {
 
 export default {
   fetchProducts,
+  fetchAdminProducts,
   fetchProductById,
   addProduct,
   removeProduct,

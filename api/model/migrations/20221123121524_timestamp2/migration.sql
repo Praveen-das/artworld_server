@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Address" ALTER COLUMN "createdAt" SET DEFAULT NOW(),
+ALTER COLUMN "createdAt" SET DATA TYPE TIMESTAMP(3);

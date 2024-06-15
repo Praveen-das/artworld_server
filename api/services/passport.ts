@@ -64,13 +64,11 @@ function googleStrategy() {
     },
     async (_, __, profile, done) => {
       const user = await getUserById(profile.id);
-      console.log(user);
       
       if (!user) {
         _signupUser({
           displayName: profile.displayName,
-          email: null,
-          // email: profile.emails ? profile.emails[0].value : null,
+          email: profile.emails ? profile.emails[0].value : null,
           photo: profile.photos ? profile.photos[0].value : "",
           provider: profile.provider,
           id: profile.id,

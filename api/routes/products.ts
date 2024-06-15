@@ -14,7 +14,7 @@ const {
 
 router.get("/", fetchProducts);
 router.get("/:id", fetchProductById);
-router.post("/", addProduct);
+router.post("/add", addProduct);
 router.put("/:id", updateProduct);
 router.delete("/:id", removeProduct);
 router.get("/search", searchProductByName);
