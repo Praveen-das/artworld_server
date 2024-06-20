@@ -18,7 +18,7 @@ const getProductReview = (req: any, res: any, next: any) => {
 };
 
 const addReview = (req: any, res: any, next: any) => {
-    const user_id = req.user.id
+    const user_id = req.user?.id
     const data = req.body
     data['user_id'] = user_id
 

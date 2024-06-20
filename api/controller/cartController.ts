@@ -9,7 +9,8 @@ const {
 } = services
 
 const fetchUserCart = (req: any, res: any, next: any) => {
-    const user_id = req.user.id
+    const user_id = req.user?.id
+    if (!user_id) return res.json([])
 
     _fetchUserCart(user_id)
         .then((data) => res.status(200).send(data))
@@ -17,7 +18,7 @@ const fetchUserCart = (req: any, res: any, next: any) => {
 };
 
 const addToCart = (req: any, res: any, next: any) => {
-    const user_id = req.user.id
+    const user_id = req.user?.id
     const data = req.body
     data['user_id'] = user_id
 
@@ -37,7 +38,7 @@ const removeFromCart = (req: any, res: any, next: any) => {
 const updateCart = (req: any, res: any, next: any) => {
     const cart_id = req.params.id
     const updates = req.body
-    
+
     _updateCart(cart_id, updates)
         .then((data) => res.status(200).send(data))
         .catch(next);

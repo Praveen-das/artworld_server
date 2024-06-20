@@ -1,13 +1,27 @@
 import { PrismaClient } from "@prisma/client";
 const db = new PrismaClient({ errorFormat: "minimal" });
 
-const _fetchUserCart = async (userId: string) => {
-    const data = await db.cart_item.findMany({
-        where: { user_id: userId },
-        include: { product: true }
-    })
+const _fetchUserCart = async (user_id: string) => {
+    const data = await db.$transaction([
+        db.cart_item.findMany({
+            where: { user_id },
+            include: { product: true }
+        }),
+        db.cart_item.aggregate({
+            where: { user_id },
+            _sum: {
+                price: true
+            },
+            _count: {
+                id: true
+            }
+        })
+    ])
 
-    return data
+    const total_price = data[1]._sum.price
+    const count = data[1]._count.id
+
+    return [data[0], { total_price, count }]
 }
 
 const _addToCart = async (payload: any) => {
@@ -28,15 +42,15 @@ const _removeFromCart = async (id: string) => {
 const _updateCart = async (id: string, data: any) => {
     const res = await db.cart_item.update({
         where: { id },
-        data
+        data,
     })
 
     return res
 }
 
-const _clearUserCart = async (userId: string) => {
+const _clearUserCart = async (user_id: string) => {
     const data = await db.cart_item.deleteMany({
-        where: { user_id: userId }
+        where: { user_id: user_id }
     })
     return data
 }

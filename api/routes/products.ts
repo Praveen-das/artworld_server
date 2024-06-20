@@ -13,11 +13,39 @@ const {
 } = controller;
 
 router.get("/", fetchProducts);
-router.get("/:id", fetchProductById);
 router.post("/add", addProduct);
+router.get("/search", searchProductByName);
+
+router.get("/popular", (req, res, next) => {
+  const { limit } = req.query
+  const filter = {
+    o: {
+      item: 'rating',
+      value: 'desc'
+    },
+    limit
+  }
+  req.query = filter
+  fetchProducts(req, res, next)
+});
+
+router.get("/latest", (req, res, next) => {
+  const { limit } = req.query
+  const filter = {
+    o: {
+      item: 'createdAt',
+      value: 'desc'
+    },
+    limit
+  }
+  req.query = filter
+  fetchProducts(req, res, next)
+});
+
+router.get("/:id", fetchProductById);
 router.put("/:id", updateProduct);
 router.delete("/:id", removeProduct);
-router.get("/search", searchProductByName);
+
 
 /*----------->> ERROR HANDLER <<-----------*/
 router.use((err: any, req: any, res: any, next: any) => {

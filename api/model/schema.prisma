@@ -15,7 +15,7 @@ model User {
   photo           String?
   provider        provider_type @default(web)
   default_address String?
-  createdAt       DateTime      @default(now())
+  createdAt       DateTime      @default(dbgenerated("NOW()"))
   cart            cart_item[]
   id              String        @id @unique @default(uuid())
 
@@ -23,8 +23,11 @@ model User {
   product                                     Product[]
   wishlist                                    wishlist[]
   reviews                                     Reviews[]
-  sales_order_personTosales_order_customer_id sales_order[] @relation("personTosales_order_customer_id")
-  sales_order_personTosales_order_seller_id   sales_order[] @relation("personTosales_order_seller_id")
+  sales_order_personTosales_order_customer_id sales_order[]     @relation("personTosales_order_customer_id")
+  sales_order_personTosales_order_seller_id   sales_order[]     @relation("personTosales_order_seller_id")
+  recently_viewed                             recently_viewed[]
+  Conversation                                Conversation[]
+  Chat                                        Chat[]
 
   @@unique([email, provider])
 }
@@ -36,19 +39,19 @@ model UserVerificationRecords {
 }
 
 model Address {
-  name      String   @db.VarChar(60)
-  address   String
-  city      String   @db.VarChar(40)
-  state     String   @db.VarChar(20)
-  pincode   Int
-  email     String
-  createdAt DateTime @default(dbgenerated("NOW()"))
-  id        String   @id @default(uuid())
-
+  name            String   @db.VarChar(60)
+  address         String
+  city            String   @db.VarChar(40)
+  state           String   @db.VarChar(20)
+  pincode         Int
+  email           String
+  createdAt       DateTime @default(dbgenerated("NOW()"))
   mobile          Int
   alternate_phone Int?
-  user            User   @relation(fields: [user_id], references: [id])
-  user_id         String
+  id              String   @id @default(uuid())
+
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String
 }
 
 model Product {
@@ -61,19 +64,21 @@ model Product {
   discount     Int
   images       Json[]
   defaultImage String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime @default(dbgenerated("NOW()"))
   modifiedAt   DateTime @updatedAt
+  rating       Int?
   id           String   @id @default(uuid())
 
   category_id     Int?
   material_id     Int?
   sales_person_id String?
-  category        Category?   @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  material        Material?   @relation(fields: [material_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sales_person    User?       @relation(fields: [sales_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_selles_person_id_fkey")
+  category        Category?         @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  material        Material?         @relation(fields: [material_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sales_person    User?             @relation(fields: [sales_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_selles_person_id_fkey")
   reviews         Reviews[]
   cart_item       cart_item[]
   wishlist        wishlist[]
+  recently_viewed recently_viewed[]
 
   @@unique([name, desc])
 }
@@ -93,7 +98,7 @@ model Material {
 model Reviews {
   createdAt  DateTime @default(dbgenerated("NOW()"))
   modifiedAt DateTime @updatedAt
-  vote       Int?     @default(0)
+  vote       Int      @default(1)
   review     Json
   id         String   @id @default(uuid())
 
@@ -106,7 +111,18 @@ model Reviews {
 }
 
 model wishlist {
-  id String @id @default(uuid())
+  createdAt DateTime @default(dbgenerated("NOW()"))
+  id        String   @id @default(uuid())
+
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id String
+  User       User    @relation(fields: [user_id], references: [id])
+  user_id    String
+}
+
+model recently_viewed {
+  createdAt DateTime @default(dbgenerated("NOW()"))
+  id        String   @id @default(uuid())
 
   product    Product @relation(fields: [product_id], references: [id])
   product_id String
@@ -116,32 +132,62 @@ model wishlist {
 
 model cart_item {
   quantity Int
+  price    Int
   discount Int    @default(0)
   id       String @id @default(uuid())
 
-  sales_order_id String?
-  sales_order    sales_order? @relation(fields: [sales_order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  product        Product?     @relation(fields: [product_id], references: [id])
-  product_id     String
-  User           User?        @relation(fields: [user_id], references: [id])
-  user_id        String
+  product     Product?      @relation(fields: [product_id], references: [id])
+  product_id  String
+  User        User?         @relation(fields: [user_id], references: [id])
+  user_id     String
+  sales_order sales_order[]
 }
 
 model sales_order {
-  timer_order_taken                      DateTime     @default(now())
-  delivery_time                          DateTime     @db.Date
-  status                                 status_type? @default(pending)
-  id                                     String       @id @default(uuid())
-  customer_id                            String?
-  seller_id                              String?
-  person_personTosales_order_customer_id User?        @relation("personTosales_order_customer_id", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  person_personTosales_order_seller_id   User?        @relation("personTosales_order_seller_id", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  cart_item                              cart_item[]
+  timer_order_taken DateTime     @default(dbgenerated("NOW()"))
+  status            status_type? @default(pending)
+  payment_method    payment_type @default(card)
+  id                String       @id @default(uuid())
+
+  cart_item                              cart_item @relation(fields: [cart_item_id], references: [id])
+  cart_item_id                           String
+  person_personTosales_order_customer_id User      @relation("personTosales_order_customer_id", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer_id                            String
+  person_personTosales_order_seller_id   User      @relation("personTosales_order_seller_id", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  seller_id                              String
+}
+
+// ---------------MESSENGER------------------------------------------------------
+
+model Conversation {
+  chat Chat[]
+  user User   @relation(fields: [user_id], references: [id])
+
+  id      String @id @default(uuid())
+  user_id String
+}
+
+model Chat {
+  message   String
+  createdAt DateTime @default(dbgenerated("NOW()"))
+  receiver  User     @relation(fields: [user_id], references: [id])
+
+  id             String        @id @default(uuid())
+  Conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  conversationId String?
+  user_id        String
 }
 
 enum sex_type {
   M
   F
+}
+
+enum payment_type {
+  card
+  cod
+  net_banking
+  upi
 }
 
 enum provider_type {
@@ -153,7 +199,9 @@ enum provider_type {
 
 enum status_type {
   pending
-  processing
-  delivered
+  shipped
+  completed
+  declined
+  refunded
   cancelled
 }

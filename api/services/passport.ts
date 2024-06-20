@@ -37,7 +37,9 @@ function localStrategy() {
             false
           );
 
-        if (await bcrypt.compare(password, user.password)) {
+        const isValid = await bcrypt.compare(password, user.password)
+
+        if (isValid) {
           delete user.password;
           return done(null, user);
         } else
@@ -64,7 +66,7 @@ function googleStrategy() {
     },
     async (_, __, profile, done) => {
       const user = await getUserById(profile.id);
-      
+
       if (!user) {
         _signupUser({
           displayName: profile.displayName,

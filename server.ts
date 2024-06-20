@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import session from "express-session";
-import cookieParser from "cookie-parser";
+// import { createServer } from "http";
 
 import userRouter from "./api/routes/userRouter";
 import productRouter from "./api/routes/products";
@@ -10,13 +10,19 @@ import initializePassport from "./api/services/passport";
 import passport from "passport";
 import authenticationRouter from "./api/routes/OAuthRouter";
 import userCart from "./api/routes/userCart";
-import userReviews from "./api/routes/useReviews";
+import userReviews from "./api/routes/userReviews";
+import payments from "./api/routes/payments";
+import salesOrder from "./api/routes/salesOrder";
+import initializeSocket from './api/services/socketIO'
 
 const app = express();
+// const httpServer = createServer(app)
+
 app.set("view engine", "ejs");
 initializePassport(passport);
 
 /*----------->> MIDDLEWARES <<-----------*/
+
 app.use(
   cors({
     origin: ["http://localhost:3000"],
@@ -27,23 +33,41 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(
-  session({
-    secret: "keyboard cat",
-    resave: false,
-    saveUninitialized: false,
-  })
-);
+const sessionMW = session({
+  secret: "keyboard cat",
+  resave: false,
+  saveUninitialized: false,
+})
+
+app.use(sessionMW);
 
 app.use(passport.initialize());
 app.use(passport.session());
 
 /*----------->> ROUTERS <<-----------*/
+
 app.use("/auth", authenticationRouter);
 app.use("/products", productRouter);
 app.use("/user", userRouter);
 app.use("/cart", userCart);
 app.use("/imagekit", imageKitRouter);
 app.use("/reviews", userReviews);
+app.use("/rzp", payments);
+app.use("/orders", salesOrder);
 
-app.listen(3001, () => console.log("server running on port 3001"));
+
+/*----------->> ERROR HANDLER <<-----------*/
+
+app.use((err: any, req: any, res: any, next: any) => {
+  if (err) {
+    console.log("ERROR HANDLER_SERVER", err);
+    console.log(err);
+
+    // res.status(err.code).send(err.error);
+  }
+});
+
+const server = app.listen(3001, () => console.log("server running on port 3001"));
+initializeSocket(server)
+
+
