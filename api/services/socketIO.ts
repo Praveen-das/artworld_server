@@ -5,9 +5,11 @@ interface chat_schema {
     user_id: string,
     to: string,
     message: string,
+    active: false,
     read: false,
     receivedOn: number,
     room: string
+    self: boolean
 }
 
 function initializeSocket(server: any) {
@@ -58,6 +60,7 @@ function initializeSocket(server: any) {
 
         socket.on('user_chat', (chat: chat_schema) => {
             chat.user_id = socket.user.user_id
+            chat.active = false
             chat.read = false
             chat.receivedOn = new Date().getTime()
 
