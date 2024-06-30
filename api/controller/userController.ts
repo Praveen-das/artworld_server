@@ -6,7 +6,8 @@ import {
   _addToWishlist,
   _removeFromlist,
   _getUserWishlist,
-  _addToRV
+  _addToRV,
+  _getUserById
 } from "../services/userServices";
 
 import bcrypt from "bcrypt";
@@ -20,6 +21,13 @@ const hashPassword = async (password: string) => {
   const salt = 12;
   return await bcrypt.hash(password, salt);
 };
+
+const getUserById = async (req: any, res: any, next: any) => {
+  const id = req.params.id
+  _getUserById(id)
+    .then((data) => res.json(data))
+    .catch((err) => next(err));
+}
 
 const signupUser = async (req: any, res: any, next: any) => {
   const credentials = req.body;
@@ -211,6 +219,7 @@ const addToRV = (req: any, res: any, next: any) => {
 }
 
 export default {
+  getUserById,
   signupUser,
   signinUser,
   logoutUser,

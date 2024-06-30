@@ -3,7 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as TwitterStrategy } from "passport-twitter";
 import bcrypt from "bcrypt";
-import { getUserById, getUserByEmail, _signupUser } from "./userServices";
+import { _getUserById, _getUserByEmail, _signupUser } from "./userServices";
 
 const initializePassport = (passport: any) => {
   passport.use(localStrategy());
@@ -16,7 +16,7 @@ const initializePassport = (passport: any) => {
   });
 
   passport.deserializeUser(async (id: any, done: any) => {
-    const user = await getUserById(id);
+    const user = await _getUserById(id);
     return done(null, user);
   });
 };
@@ -25,7 +25,7 @@ function localStrategy() {
   return new LocalStrategy(
     { usernameField: "email" },
     async (email, password, done) => {
-      const user: any = await getUserByEmail(email);
+      const user: any = await _getUserByEmail(email);
 
       try {
         if (!user)
@@ -65,7 +65,7 @@ function googleStrategy() {
       callbackURL: "/auth/google/redirect",
     },
     async (_, __, profile, done) => {
-      const user = await getUserById(profile.id);
+      const user = await _getUserById(profile.id);
 
       if (!user) {
         _signupUser({
@@ -95,7 +95,7 @@ function facebookStrategy() {
       profileFields: ["id", "displayName", "photos", "email"],
     },
     async (_, __, profile, done) => {
-      const user = await getUserById(profile.id);
+      const user = await _getUserById(profile.id);
 
       if (!user) {
         _signupUser({

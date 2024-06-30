@@ -1,15 +1,18 @@
 import { Server } from 'socket.io'
-let users: any = []
+
+let users: any = new Map()
+let store: any = new Map()
+let actions: any = new Map()
+let blockedList: any = new Map()
 
 interface chat_schema {
-    user_id: string,
+    from: string,
     to: string,
     message: string,
     active: false,
-    read: false,
+    new: true,
     receivedOn: number,
-    room: string
-    self: boolean
+    status: string,
 }
 
 function initializeSocket(server: any) {
@@ -17,78 +20,120 @@ function initializeSocket(server: any) {
         cors: { origin: ["http://localhost:3000"] },
     });
 
-    // io.on('connection', (socket: any) => {
-    //     socket.on('connect_room', (user_id: string) => {
-    //         for (let room of rooms) {
-    //             const [sid, user_id] = room?.split('|')
-    //             if (sid === user_id) {
-    //                 if (!receivers.some((o: any) => o.room === room)) {
-    //                     receivers.push({ isVisited: false, room, user_id, sid })
-    //                 }
-    //                 socket.join(room)
-    //             }
-    //         }
-    //         socket.emit('receivers', receivers)
-    //     })
-
-    //     //-------------FOR CLIENT-------------///////////////
-    //     socket.on('chat', (data: any) => {
-    //         !rooms.includes(data.room) && rooms.push(data.room)
-    //         !Array.from(socket.rooms).includes(data.room) && socket.join(data.room)
-    //         io.to(data.room).emit('message', data.message)
-    //     })
-
-    //     socket.on('disconnect', (args: any) => {
-    //         console.log('user disconnected');
-    //     });
-    // });
     io.on('connection', (socket: any) => {
         socket.user = socket.handshake.auth.user
 
-        const userData = {
-            ...socket.user,
-            sid: socket.id,
-            active: true,
-            messages: []
+        let messages = store.get(socket.user.user_id),
+            requests = actions.get(socket.user.user_id)
+
+        let user = users.get(socket.user.user_id)
+        
+        if (user) {
+            user.active = true
+            user.sid = socket.id
+        } else {
+            user = {
+                ...socket.user,
+                sid: socket.id,
+                active: true,
+            }
+            users.set(socket.user.user_id, user)
         }
+        
+        let blockedUsers: Array<string> = []
 
-        users = users.filter((o: any) => o?.user_id !== socket.user.user_id)
-        users.push(userData)
-
-        socket.broadcast.emit("user connected", userData);
-        socket.emit('users', users)
+        blockedList.forEach((value: Array<string>, key: string) => {
+            if (value?.includes(socket.user.user_id)) {
+                blockedUsers.push(key)
+            }
+        })
+        
+        socket.broadcast.emit("user connected", user);
+        socket.emit('users', {
+            users: Array.from(users.values()),
+            messages: messages ? Array.from(messages) : [],
+            requests: requests ? Array.from(requests) : [],
+            blockedUsers
+        })
 
         socket.on('user_chat', (chat: chat_schema) => {
-            chat.user_id = socket.user.user_id
             chat.active = false
-            chat.read = false
+            chat.new = true
+            chat.from = socket.user.user_id
             chat.receivedOn = new Date().getTime()
 
-            const array = [chat.user_id, chat.to]
-            chat.room = array.sort().join('|')
+            const user = users.get(chat.to)
+            const roomId = generateRoomId(chat.from, chat.to)
+            const blockedUsers = blockedList.get(socket.user.user_id) || []
+            if (blockedUsers.includes(chat.to))
+                return socket.emit('receive', chat)
+            if (user.active) {
+                chat.status = 'received'
+                io.to(socket.id).to(user.sid).emit('receive', chat)
+            } else {
+                const messages = store.get(chat.to)
 
-            const receiver = users.find((user: any) => user.user_id === chat.to)
-            // receiver.messages.push(chat)
+                chat.status = 'sent'
 
-            if (receiver) {
-                io.to(socket.id).to(receiver.sid).emit('receive', chat)
+                if (messages) {
+                    if (messages.has(roomId)) messages.get(roomId).push(chat)
+                    else messages.set(roomId, [chat])
+                } else store.set(chat.to, new Map([[roomId, [chat]]]))
+
+                socket.emit('receive', chat)
+            }
+        })
+
+        socket.on('chatSeen', ({ user_id, roomId }: any) => {
+            const { sid } = users.get(user_id)
+            store.get(socket.user.user_id)?.delete(roomId)
+            io.to(socket.id).to(sid).emit('chatSeen', roomId)
+        })
+
+        socket.on('block_room', (user_id: string) => {
+            blockedList.get(user_id)?.push(socket.user.user_id) ||
+                blockedList.set(user_id, [socket.user.user_id])
+
+            socket.emit('roomBlocked', user_id)
+        })
+        socket.on('unblock_room', (user_id: string) => {
+            let chat = blockedList.get(user_id)
+            chat = chat?.filter((uid: string) => uid !== socket.user.user_id)
+            blockedList.set(user_id, chat)
+            socket.emit('unblock_room', user_id)
+        })
+
+        socket.on('delete', (request: any) => {
+            const { user_id, roomId, chatId } = request,
+                user = users.get(user_id)
+
+            if (user.active) io.to(socket.id).to(user.sid).emit('delete', [[roomId, [chatId]]])
+            else {
+                const userActions = actions.get(user_id)
+                if (userActions) {
+                    if (userActions.has(roomId)) userActions.get(roomId).push(chatId)
+                    else userActions.set(roomId, [chatId])
+                } else actions.set(user_id, new Map([[roomId, [chatId]]]))
+                io.to(socket.id).emit('delete', [[roomId, [chatId]]])
             }
         })
 
         ////////////////////////////////////////////////
         socket.on('disconnect', () => {
             const lastActive = new Date().getTime()
-            users = users.map((user: any) => {
-                if (user.sid === socket.id) {
-                    user.lastActive = lastActive
-                    user.active = false
-                }
-                return user
-            })
+            const user = users.get(socket.user.user_id)
+            user.lastActive = lastActive
+            user.active = false
+
             socket.broadcast.emit('user disconnected', { sid: socket.id, user_id: socket.user.user_id, lastActive, active: false })
         });
     });
 
 }
 
+function generateRoomId(...userIds: any) {
+    return userIds.sort().toString()
+}
+
 export default initializeSocket
+
