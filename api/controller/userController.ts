@@ -24,6 +24,7 @@ const hashPassword = async (password: string) => {
 
 const getUserById = async (req: any, res: any, next: any) => {
   const id = req.params.id
+
   _getUserById(id)
     .then((data) => res.json(data))
     .catch((err) => next(err));

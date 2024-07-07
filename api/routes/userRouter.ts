@@ -23,13 +23,13 @@ const { fetchAdminProducts } = productController
 
 const userRouter = express.Router();
 
+
 userRouter.get("/", (req, res) => res.send(req.user));
 userRouter.put("/update", updateUser);
 userRouter.post("/signup", signupUser);
 userRouter.post("/signin", passport.authenticate("local"), signinUser);
 userRouter.get("/logout", logoutUser);
 userRouter.get("/products", fetchAdminProducts);
-userRouter.get("/:id", getUserById);
 
 userRouter.post("/address", addUserAddress);
 userRouter.delete("/address/:id", deleteUserAddress);
@@ -39,6 +39,8 @@ userRouter.post("/wishlist/add/:id", addToWishlist);
 userRouter.delete("/wishlist/remove/:id", removeFromWishlist);
 
 userRouter.post("/rv/add/:id", addToRV);
+
+userRouter.get("/:id", getUserById);
 // userRouter.put("/address", updateUserAddress);
 
 /*---------------------->> ERROR HANDLER <<----------------------*/
