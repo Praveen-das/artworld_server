@@ -131,10 +131,11 @@ model recently_viewed {
 }
 
 model cart_item {
-  quantity Int
-  price    Int
-  discount Int    @default(0)
-  id       String @id @default(uuid())
+  createdAt DateTime @default(dbgenerated("NOW()"))
+  quantity  Int
+  price     Int
+  discount  Int      @default(0)
+  id        String   @id @default(uuid())
 
   product     Product?      @relation(fields: [product_id], references: [id])
   product_id  String
