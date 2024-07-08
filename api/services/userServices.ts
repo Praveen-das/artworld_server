@@ -11,6 +11,7 @@ const _getUserByEmail = async (email: string, provider: any = 'web') => {
     where: { email, provider: provider },
     include: {
       address: { orderBy: { createdAt: 'desc' } },
+      social: true
     },
   });
 
@@ -33,7 +34,11 @@ const _getUserById = async (id: string) => {
             }
           },
         }
-      }
+      },
+      social: true,
+      sales_order_personTosales_order_customer_id: { include: { cart_item: { include: { product: true } } } },
+      wishlist: { include: { product: true } },
+      cart: { include: { product: true } }
     },
   });
 
@@ -47,6 +52,31 @@ const _updateUser = async (id: string, updates: any) => {
   });
   return data;
 };
+
+interface links {
+  uid: string,
+  name: string,
+  utl: string
+}
+
+const _addSocialMediaLink = async (id: string, links: Array<links>) => {
+  let data: any = links.map((link: any) => {
+    return db.social.upsert({
+      create: {
+        ...link,
+        user_id: id
+      },
+      update: link,
+      where: { user_id_name: { user_id: id, name: link.name } }
+    })
+  })
+
+  return await db.$transaction(data)
+}
+
+const _removeSocialMediaLink = async (id: string) => {
+  return await db.social.delete({ where: { id } })
+}
 
 const _addUserAddress = async (address: any) => {
   try {
@@ -73,7 +103,7 @@ const _addToWishlist = async (data: any) => {
 };
 
 const _getUserWishlist = async (user_id: string) => {
-  const res = await db.wishlist.findMany({ where: { user_id }, include: { product: true } });
+  const res = await db.wishlist.findMany({ where: { user_id }, orderBy: { createdAt: 'desc' }, include: { product: true } });
   return res;
 };
 
@@ -98,5 +128,8 @@ export {
   _addToWishlist,
   _getUserWishlist,
   _removeFromlist,
-  _addToRV
+  _addToRV,
+
+  _addSocialMediaLink,
+  _removeSocialMediaLink,
 };

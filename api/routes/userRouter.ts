@@ -16,7 +16,10 @@ const {
   getUserWishlist,
   addToWishlist,
   removeFromWishlist,
-  addToRV
+  addToRV,
+
+  addSocialMediaLink,
+  removeSocialMediaLink
 } = userController
 
 const { fetchAdminProducts } = productController
@@ -39,6 +42,9 @@ userRouter.post("/wishlist/add/:id", addToWishlist);
 userRouter.delete("/wishlist/remove/:id", removeFromWishlist);
 
 userRouter.post("/rv/add/:id", addToRV);
+
+userRouter.post("/social", addSocialMediaLink);
+userRouter.delete("/social/:id", removeSocialMediaLink);
 
 userRouter.get("/:id", getUserById);
 // userRouter.put("/address", updateUserAddress);
