@@ -17,7 +17,7 @@ interface chat_schema {
 
 function initializeSocket(server: any) {
     const io = new Server(server, {
-        cors: { origin: ["http://localhost:3000"] },
+        cors: { origin: ["http://localhost:3000", "https://artsworld.vercel.app"] },
     });
 
     io.on('connection', (socket: any) => {
@@ -27,7 +27,7 @@ function initializeSocket(server: any) {
             requests = actions.get(socket.user.user_id)
 
         let user = users.get(socket.user.user_id)
-        
+
         if (user) {
             user.active = true
             user.sid = socket.id
@@ -39,7 +39,7 @@ function initializeSocket(server: any) {
             }
             users.set(socket.user.user_id, user)
         }
-        
+
         let blockedUsers: Array<string> = []
 
         blockedList.forEach((value: Array<string>, key: string) => {
@@ -47,7 +47,7 @@ function initializeSocket(server: any) {
                 blockedUsers.push(key)
             }
         })
-        
+
         socket.broadcast.emit("user connected", user);
         socket.emit('users', {
             users: Array.from(users.values()),

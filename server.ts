@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import session from "express-session";
-// import { createServer } from "http";
 
 import userRouter from "./api/routes/userRouter";
 import productRouter from "./api/routes/products";
@@ -25,7 +24,7 @@ initializePassport(passport);
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "https://artsworld.vercel.app"],
     credentials: true,
   })
 );
