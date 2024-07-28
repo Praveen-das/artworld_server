@@ -1,8 +1,7 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "server.ts",
+      "src": "api/**/*.ts",
       "use": "@now/node"
     }
   ],
@@ -11,5 +10,17 @@
       "src": "/(.*)",
       "dest": "server.ts"
     }
-  ]
+  ],
+  "env": {
+    "DATABASE_URL": "postgresql://postgres:6862554das@localhost:5432/artworld?connect_timeout=300",
+    "IMAGEKIT_URL_ENDPOINT": "https://ik.imagekit.io/1q7keivsfku/",
+    "IMAGEKIT_PUBLIC_KEY": "public_TgB5AGA3AeEiZhn3/24RR02eNbo=",
+    "IMAGEKIT_PRIVATE_KEY": "private_g3JYRuGQ28uiCnLB8/WbmIERHe8=",
+    "ACCESS_TOKEN_SECRET_KEY": "9f57dad3b8ee13d23b42fb6c5787c36086db7bf44356cb548918ef22a1cb10f4117a98649d94ef4a17ddbefadf8a6eddd1e070258c48424419bfb12c2be6f2a4",
+    "REFRESH_TOKEN_SECRET_KEY": "12e8183168b568806b8f32559f390e425e2c537d94483ff9f9f558f7beef02231e46810cb45357a84ba783fc7dd9ef76ef35e9b8bbc03531b04251ed2f650f6a",
+    "GOOGLE_CLIENT_ID": "579389242399-8p3nfb3n07nqecr7ct92k95fp9359oru.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "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",
+    "FACEBOOK_CLIENT_ID": "669695564550218",
+    "FACEBOOK_CLIENT_SECRET": "6a017c907b0306bad65642bd23d5d8c0"
+  }
 }
