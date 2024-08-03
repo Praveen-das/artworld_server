@@ -10,8 +10,8 @@ const googleAuth = (req: any, res: any, next: any) => {
 
 const googleAuthRedirect = (req: any, res: any, next: any) => {
   return passport.authenticate("google", {
-    successRedirect: "https://artsworld.vercel.app",
-    failureRedirect: "https://artsworld.vercel.app/login",
+    successRedirect: "https://artworld-nine.vercel.app",
+    failureRedirect: "https://artworld-nine.vercel.app/login",
   })(req, res, next);
 };
 
@@ -25,8 +25,8 @@ const facebookAuth = (req: any, res: any, next: any) => {
 
 const facebookAuthRedirect = (req: any, res: any, next: any) => {
   return passport.authenticate("facebook", {
-    successRedirect: "https://artsworld.vercel.app",
-    failureRedirect: "https://artsworld.vercel.app/login",
+    successRedirect: "https://artworld-nine.vercel.app",
+    failureRedirect: "https://artworld-nine.vercel.app/login",
   })(req, res, next);
 };
 

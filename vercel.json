@@ -1,13 +1,13 @@
 {
   "builds": [
     {
-      "src": "api/**/*.ts",
+      "src": "server.ts",
       "use": "@now/node"
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "api/**/*.ts",
       "dest": "server.ts"
     }
   ],

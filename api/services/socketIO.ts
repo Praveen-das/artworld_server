@@ -17,7 +17,7 @@ interface chat_schema {
 
 function initializeSocket(server: any) {
     const io = new Server(server, {
-        cors: { origin: ["http://localhost:3000", "https://artsworld.vercel.app"] },
+        cors: { origin: ["http://localhost:3000", "https://artworld-nine.vercel.app"] },
     });
 
     io.on('connection', (socket: any) => {
