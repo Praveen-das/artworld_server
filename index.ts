@@ -13,6 +13,7 @@ import userReviews from "./api/routes/userReviews";
 import payments from "./api/routes/payments";
 import salesOrder from "./api/routes/salesOrder";
 import initializeSocket from './api/services/socketIO'
+import product from './api/product'
 
 const app = express();
 // const httpServer = createServer(app)
@@ -45,7 +46,8 @@ app.use(passport.session());
 
 /*----------->> ROUTERS <<-----------*/
 
-app.get('/test', (req: any, res: any) => res.send('test successfull'))
+app.get('/', (req: any, res: any) => res.send('server running.'))
+app.use("/api/product", product);
 app.use("/auth", authenticationRouter);
 app.use("/products", productRouter);
 app.use("/user", userRouter);
