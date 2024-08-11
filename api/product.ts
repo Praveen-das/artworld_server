@@ -1,4 +1,5 @@
-const express = require("express");
+import express from "express"
+
 const router = express.Router();
 
 /**
@@ -6,7 +7,7 @@ const router = express.Router();
  *
  * @return product list | empty.
  */
-router.get("/", async (req: any, res: any) => {
+router.get("/", async (req, res) => {
   try {
     res.json({
       status: 200,
