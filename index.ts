@@ -4,7 +4,7 @@ import session from "express-session";
 
 
 // import userRouter from "./api/routes/userRouter";
-// import productRouter from "./api/routes/products";
+import productRouter from "./api/routes/products";
 // import imageKitRouter from "./api/routes/imageKit";
 // // import initializePassport from "./api/services/passport";
 // // import passport from "passport";
@@ -52,7 +52,7 @@ app.use(sessionMW);
 app.get('/', (req: any, res: any) => res.send('server running.'))
 // app.use("/api/product", product);
 // app.use("/auth", authenticationRouter);
-// app.use("/products", productRouter);
+app.use("/products", productRouter);
 // app.use("/user", userRouter);
 // app.use("/cart", userCart);
 // app.use("/imagekit", imageKitRouter);
