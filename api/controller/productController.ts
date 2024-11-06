@@ -2,12 +2,12 @@ import { object, number, string, array } from "yup";
 
 import {
   _fetchProducts,
-  _fetchAdminProducts,
-  _addProduct,
-  _removeProduct,
-  _updateProduct,
-  _searchProduct,
-  _fetchProductById,
+  // _fetchAdminProducts,
+  // _addProduct,
+  // _removeProduct,
+  // _updateProduct,
+  // _searchProduct,
+  // _fetchProductById,
 } from "../services/productServices";
 
 const fetchProducts = (req: any, res: any, next: any) => {
@@ -43,85 +43,85 @@ const fetchProducts = (req: any, res: any, next: any) => {
 };
 
 
-const fetchAdminProducts = (req: any, res: any, next: any) => {
-  const DEFAULT_PAGE = 1;
-  const DEFAULT_LIMIT = 10;
-  const userId = req.user?.id
+// const fetchAdminProducts = (req: any, res: any, next: any) => {
+//   const DEFAULT_PAGE = 1;
+//   const DEFAULT_LIMIT = 10;
+//   const userId = req.user?.id
 
-  let {
-    page = DEFAULT_PAGE,
-    limit = DEFAULT_LIMIT,
-    query,
-  } = req.query;
+//   let {
+//     page = DEFAULT_PAGE,
+//     limit = DEFAULT_LIMIT,
+//     query,
+//   } = req.query;
 
-  let search
+//   let search
 
-  if (query) {
-    search = {
-      name: {
-        search: query
-      },
-      id: {
-        search: query
-      },
-    }
-  }
+//   if (query) {
+//     search = {
+//       name: {
+//         search: query
+//       },
+//       id: {
+//         search: query
+//       },
+//     }
+//   }
 
-  limit = parseInt(limit);
-  page = parseInt(page);
+//   limit = parseInt(limit);
+//   page = parseInt(page);
 
-  _fetchAdminProducts(userId, search, page, limit)
-    .then((data) => res.status(200).send(data))
-    .catch(next);
-};
+//   _fetchAdminProducts(userId, search, page, limit)
+//     .then((data) => res.status(200).send(data))
+//     .catch(next);
+// };
 
-const fetchProductById = (req: any, res: any, next: any) => {
-  const id = req.params.id;
+// const fetchProductById = (req: any, res: any, next: any) => {
+//   const id = req.params.id;
 
-  _fetchProductById(id)
-    .then((data) => res.status(200).send(data))
-    .catch(next);
-};
+//   _fetchProductById(id)
+//     .then((data) => res.status(200).send(data))
+//     .catch(next);
+// };
 
-const searchProductByName = (req: any, res: any, next: any) => {
-  const query = req.query;
-  _searchProduct(query)
-    .then((data) => res.status(200).send(data))
-    .catch(next);
-};
+// const searchProductByName = (req: any, res: any, next: any) => {
+//   const query = req.query;
+//   _searchProduct(query)
+//     .then((data) => res.status(200).send(data))
+//     .catch(next);
+// };
 
-const addProduct = async (req: any, res: any, next: any) => {
-  const product = req.body;
-  product['sales_person_id'] = req.user?.id
+// const addProduct = async (req: any, res: any, next: any) => {
+//   const product = req.body;
+//   product['sales_person_id'] = req.user?.id
 
-  _addProduct(product)
-    .then((data) => res.status(200).send(data))
-    .catch(next);
-};
+//   _addProduct(product)
+//     .then((data) => res.status(200).send(data))
+//     .catch(next);
+// };
 
-const removeProduct = async (req: any, res: any, next: any) => {
-  const id = req.params.id;
+// const removeProduct = async (req: any, res: any, next: any) => {
+//   const id = req.params.id;
 
-  _removeProduct(id)
-    .then(() => res.status(200).json({ message: "Product removed" }))
-    .catch(next);
-};
+//   _removeProduct(id)
+//     .then(() => res.status(200).json({ message: "Product removed" }))
+//     .catch(next);
+// };
 
-const updateProduct = async (req: any, res: any, next: any) => {
-  const id = req.params.id;
-  const updates = req.body;
+// const updateProduct = async (req: any, res: any, next: any) => {
+//   const id = req.params.id;
+//   const updates = req.body;
 
-  _updateProduct(id, updates)
-    .then((data) => res.status(200).json(data))
-    .catch(next);
-};
+//   _updateProduct(id, updates)
+//     .then((data) => res.status(200).json(data))
+//     .catch(next);
+// };
 
 export default {
   fetchProducts,
-  fetchAdminProducts,
-  fetchProductById,
-  addProduct,
-  removeProduct,
-  updateProduct,
-  searchProductByName,
+  // fetchAdminProducts,
+  // fetchProductById,
+  // addProduct,
+  // removeProduct,
+  // updateProduct,
+  // searchProductByName,
 };
