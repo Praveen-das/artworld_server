@@ -3,16 +3,16 @@ import cors from "cors";
 import session from "express-session";
 
 
-// import userRouter from "./api/routes/userRouter";
+import userRouter from "./api/routes/userRouter";
 import productRouter from "./api/routes/products";
-// import imageKitRouter from "./api/routes/imageKit";
-// // import initializePassport from "./api/services/passport";
-// // import passport from "passport";
-// import authenticationRouter from "./api/routes/OAuthRouter";
-// import userCart from "./api/routes/userCart";
-// import userReviews from "./api/routes/userReviews";
-// import payments from "./api/routes/payments";
-// import salesOrder from "./api/routes/salesOrder";
+import imageKitRouter from "./api/routes/imageKit";
+import initializePassport from "./api/services/passport";
+import passport from "passport";
+import authenticationRouter from "./api/routes/OAuthRouter";
+import userCart from "./api/routes/userCart";
+import userReviews from "./api/routes/userReviews";
+import payments from "./api/routes/payments";
+import salesOrder from "./api/routes/salesOrder";
 // import initializeSocket from './api/services/socketIO'
 
 import product from "./api/product"
@@ -22,7 +22,7 @@ const app = express();
 // const httpServer = createServer(app)
 
 // app.set("view engine", "ejs");
-// initializePassport(passport);
+initializePassport(passport);
 
 // /*----------->> MIDDLEWARES <<-----------*/
 
@@ -44,21 +44,21 @@ const sessionMW = session({
 
 app.use(sessionMW);
 
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 
 // /*----------->> ROUTERS <<-----------*/
 
 app.get('/', (req: any, res: any) => res.send('server running.'))
-// app.use("/api/product", product);
-// app.use("/auth", authenticationRouter);
+app.use("/api/product", product);
+app.use("/auth", authenticationRouter);
 app.use("/products", productRouter);
-// app.use("/user", userRouter);
-// app.use("/cart", userCart);
-// app.use("/imagekit", imageKitRouter);
-// app.use("/reviews", userReviews);
-// app.use("/rzp", payments);
-// app.use("/orders", salesOrder);
+app.use("/user", userRouter);
+app.use("/cart", userCart);
+app.use("/imagekit", imageKitRouter);
+app.use("/reviews", userReviews);
+app.use("/rzp", payments);
+app.use("/orders", salesOrder);
 
 app.use("/api/product", product);
 app.use("/api/test", test);

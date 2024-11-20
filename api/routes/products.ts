@@ -5,46 +5,46 @@ const router = express.Router();
 
 const {
   fetchProducts,
-  // fetchProductById,
-  // addProduct,
-  // removeProduct,
-  // updateProduct,
-  // searchProductByName,
+  fetchProductById,
+  addProduct,
+  removeProduct,
+  updateProduct,
+  searchProductByName,
 } = controller;
 
 router.get("/", fetchProducts);
-// router.post("/add", addProduct);
-// router.get("/search", searchProductByName);
+router.post("/add", addProduct);
+router.get("/search", searchProductByName);
 
-// router.get("/popular", (req, res, next) => {
-//   const { limit } = req.query
-//   const filter = {
-//     o: {
-//       item: 'rating',
-//       value: 'desc'
-//     },
-//     limit
-//   }
-//   req.query = filter
-//   fetchProducts(req, res, next)
-// });
+router.get("/popular", (req, res, next) => {
+  const { limit } = req.query
+  const filter = {
+    o: {
+      item: 'rating',
+      value: 'desc'
+    },
+    limit
+  }
+  req.query = filter
+  fetchProducts(req, res, next)
+});
 
-// router.get("/latest", (req, res, next) => {
-//   const { limit } = req.query
-//   const filter = {
-//     o: {
-//       item: 'createdAt',
-//       value: 'desc'
-//     },
-//     limit
-//   }
-//   req.query = filter
-//   fetchProducts(req, res, next)
-// });
+router.get("/latest", (req, res, next) => {
+  const { limit } = req.query
+  const filter = {
+    o: {
+      item: 'createdAt',
+      value: 'desc'
+    },
+    limit
+  }
+  req.query = filter
+  fetchProducts(req, res, next)
+});
 
-// router.get("/:id", fetchProductById);
-// router.put("/:id", updateProduct);
-// router.delete("/:id", removeProduct);
+router.get("/:id", fetchProductById);
+router.put("/:id", updateProduct);
+router.delete("/:id", removeProduct);
 
 
 /*----------->> ERROR HANDLER <<-----------*/
