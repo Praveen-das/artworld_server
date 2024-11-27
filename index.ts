@@ -30,6 +30,8 @@ app.use(
   cors({
     origin: ["http://localhost:3000", "https://artworld-nine.vercel.app"],
     credentials: true,
+    allowedHeaders: 'Content-Type,Authorization',
+    preflightContinue: false,
   })
 );
 
