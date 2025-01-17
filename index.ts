@@ -44,8 +44,8 @@ const sessionMW = session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    // sameSite: "none",
-    // secure: true
+    sameSite: "none",
+    secure: true
   }
 })
 
