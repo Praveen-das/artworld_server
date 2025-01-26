@@ -52,7 +52,10 @@ const signinUser = (req: any, res: any, next: any) => {
     if (err) return next(err);
     req.logIn(user, (err: any) => {
       if (err) next(err);
-      else res.send(req.user);
+      else {
+        console.log(res.getHeaders());
+        res.send(req.user);
+      }
     });
   })(req, res, next);
 };

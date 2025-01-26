@@ -6,8 +6,8 @@ const key_secret = 'ASJvaVcZfcQypXMwH9svwO89'
 var instance = new Razorpay({ key_id, key_secret })
 
 export async function _createOrder(order: any) {
-    return await instance.orders.create({
+    // return await instance.orders.create({
         
-    })
+    // })
 }
 
