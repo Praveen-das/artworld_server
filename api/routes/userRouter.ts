@@ -27,8 +27,7 @@ const { fetchAdminProducts } = productController
 const userRouter = express.Router();
 
 
-// userRouter.get("/", (req, res) => res.send(req.user));
-userRouter.get("/", (req, res) => res.cookie('sid','qweqwewqewqeqwewqewqeqweasdacz').send('cookies send'));
+userRouter.get("/", (req, res) => res.send(req.user));
 userRouter.put("/update", updateUser);
 userRouter.post("/signup", signupUser);
 userRouter.post("/signin", passport.authenticate("local"), signinUser);
