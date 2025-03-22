@@ -19,7 +19,7 @@ const _getUserByEmail = async (email: string, provider: any = 'web') => {
 };
 
 const _getUserById = async (id: string) => {
-  const data = await db.user.findUnique({
+  const data: any = await db.user.findUnique({
     where: { id },
     include: {
       address: { orderBy: { createdAt: 'desc' } },
@@ -41,6 +41,13 @@ const _getUserById = async (id: string) => {
       cart: { include: { product: true } }
     },
   });
+
+  if (data) {
+    data.social = data.social?.reduce((a: any, b: any) => {
+      a[b.name] = b
+      return a
+    }, {})
+  }
 
   return data;
 };

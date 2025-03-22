@@ -10,9 +10,12 @@ const {
   removeProduct,
   updateProduct,
   searchProductByName,
+  fetchFilterParams
 } = controller;
 
 router.get("/", fetchProducts);
+router.get("/fetch", fetchFilterParams);
+router.get("/categories", fetchFilterParams);
 router.post("/add", addProduct);
 router.get("/search", searchProductByName);
 

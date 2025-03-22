@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 import path from 'path'
+import formidable from 'formidable'
 
 import corsOptions from "./api/config/cors/corsOptions";
 
@@ -16,7 +17,7 @@ import userCart from "./api/routes/userCart";
 import userReviews from "./api/routes/userReviews";
 import payments from "./api/routes/payments";
 import salesOrder from "./api/routes/salesOrder";
-// import initializeSocket from './api/services/socketIO'
+import initializeSocket from './api/services/socketIO'
 
 import product from "./api/root"
 import test from "./api/test/test"
@@ -46,6 +47,35 @@ app.use(passport.session());
 
 // /*----------->> ROUTERS <<-----------*/
 
+app.post('/save', (req, res, next) => {
+  const form = formidable({ multiples: false });
+
+  console.log("BEGIN /save");
+  console.log(`req: ${JSON.stringify(req.body)}`);
+
+  form.parse(req, (err, fields, files: any) => {
+    // console.log(files);
+
+  });
+})
+
+app.post('/upload', (req, res, next) => {
+  const form = formidable({ multiples: true });
+
+  form.parse(req, (err, fields, files: any) => {
+    if (err) {
+      console.log(err);
+      next(err);
+      return;
+    }
+    let theFile = files.files.filepath;
+    // console.log(theFile);
+    
+    res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': 'http://localhost:3000' });
+    res.end(theFile);
+  });
+})
+
 app.use('/', root)
 app.use("/api/product", product);
 app.use("/auth", authenticationRouter);
@@ -59,7 +89,6 @@ app.use("/orders", salesOrder);
 
 app.use("/api/product", product);
 app.use("/api/test", test);
-
 
 app.all('*', (_, res) => {
   res.status(404)
@@ -78,7 +107,5 @@ app.use((err: any, req: any, res: any, next: any) => {
   }
 });
 
-
-
 const server = app.listen(3001, () => console.log("server running on port 3001"));
-// initializeSocket(server)
+initializeSocket(server)

@@ -18,6 +18,7 @@ model User {
   createdAt       DateTime      @default(dbgenerated("NOW()"))
   cart            cart_item[]
   social          Social[]
+  // role            role          @default(user)
   id              String        @id @unique @default(uuid())
 
   address                                     Address[]
@@ -67,19 +68,17 @@ model Address {
 }
 
 model Product {
-  name         String   @db.VarChar(50)
-  desc         String
-  width        Int
-  height       Int
-  quantity     Int
-  price        Int
-  discount     Int
-  images       Json[]
-  defaultImage String
-  createdAt    DateTime @default(dbgenerated("NOW()"))
-  modifiedAt   DateTime @updatedAt
-  rating       Int?
-  id           String   @id @default(uuid())
+  name       String   @db.VarChar(50)
+  desc       String
+  quantity   Int
+  price      Int
+  discount   Int
+  images     Json[]
+  createdAt  DateTime @default(dbgenerated("NOW()"))
+  modifiedAt DateTime @updatedAt
+  size       Json[]
+  rating     Int?
+  id         String   @id @default(uuid())
 
   category_id     Int?
   material_id     Int?
@@ -145,7 +144,7 @@ model recently_viewed {
 model cart_item {
   createdAt DateTime @default(dbgenerated("NOW()"))
   quantity  Int
-  // size      String
+  size      String
   price     Int
   discount  Int      @default(0)
   id        String   @id @default(uuid())
@@ -196,6 +195,11 @@ enum sex_type {
   M
   F
 }
+
+// enum role {
+//   admin
+//   user
+// }
 
 enum payment_type {
   card

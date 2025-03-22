@@ -47,7 +47,7 @@ function initializeSocket(server: any) {
                 blockedUsers.push(key)
             }
         })
-
+        
         socket.broadcast.emit("user connected", user);
         socket.emit('users', {
             users: Array.from(users.values()),

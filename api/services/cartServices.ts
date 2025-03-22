@@ -15,7 +15,8 @@ const _fetchUserCart = async (user_id: string) => {
         db.cart_item.aggregate({
             where: { user_id },
             _sum: {
-                price: true
+                price: true,
+                discount: true
             },
             _count: {
                 id: true

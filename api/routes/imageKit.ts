@@ -3,8 +3,8 @@ import { _imageKit, _deleteFile } from "../services/imageKit";
 
 const router = express.Router();
 
-router.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+router.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
@@ -13,6 +13,6 @@ router.use(function (req, res, next) {
 });
 
 router.get("/auth", _imageKit);
-router.delete("/:id", _deleteFile);
+router.delete("/delete", _deleteFile);
 
 export default router;
