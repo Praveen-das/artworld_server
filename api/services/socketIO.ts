@@ -17,7 +17,17 @@ interface chat_schema {
 
 function initializeSocket(server: any) {
     const io = new Server(server, {
-        cors: { origin: ["http://localhost:3000", "https://artworld-nine.vercel.app"] },
+        cors: {
+            origin:
+                [
+                    "http://localhost:3000",
+                    // "https://artworld-nine.vercel.app"
+                ]
+        },
+        connectionStateRecovery: {
+            maxDisconnectionDuration: 2 * 60 * 1000,
+            skipMiddlewares: true,
+        }
     });
 
     io.on('connection', (socket: any) => {
@@ -47,14 +57,15 @@ function initializeSocket(server: any) {
                 blockedUsers.push(key)
             }
         })
-        
-        socket.broadcast.emit("user connected", user);
+
         socket.emit('users', {
             users: Array.from(users.values()),
             messages: messages ? Array.from(messages) : [],
             requests: requests ? Array.from(requests) : [],
             blockedUsers
         })
+        
+        socket.broadcast.emit("user connected", user);
 
         socket.on('user_chat', (chat: chat_schema) => {
             chat.active = false
@@ -119,7 +130,9 @@ function initializeSocket(server: any) {
         })
 
         ////////////////////////////////////////////////
-        socket.on('disconnect', () => {
+        socket.on('disconnect', (reason: any) => {
+            console.log('disconnected');
+
             const lastActive = new Date().getTime()
             const user = users.get(socket.user.user_id)
             user.lastActive = lastActive

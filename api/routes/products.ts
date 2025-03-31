@@ -10,7 +10,8 @@ const {
   removeProduct,
   updateProduct,
   searchProductByName,
-  fetchFilterParams
+  fetchFilterParams,
+  fetchTopSellingProducts
 } = controller;
 
 router.get("/", fetchProducts);
@@ -19,29 +20,12 @@ router.get("/categories", fetchFilterParams);
 router.post("/add", addProduct);
 router.get("/search", searchProductByName);
 
-router.get("/popular", (req, res, next) => {
-  const { limit } = req.query
-  const filter = {
-    o: {
-      item: 'rating',
-      value: 'desc'
-    },
-    limit
-  }
-  req.query = filter
-  fetchProducts(req, res, next)
-});
+router.get("/topselling", fetchTopSellingProducts);
 
 router.get("/latest", (req, res, next) => {
-  const { limit } = req.query
-  const filter = {
-    o: {
-      item: 'createdAt',
-      value: 'desc'
-    },
-    limit
+  req.query.orderBy = {
+    createdAt: 'desc'
   }
-  req.query = filter
   fetchProducts(req, res, next)
 });
 

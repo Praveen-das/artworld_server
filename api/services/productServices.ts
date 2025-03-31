@@ -2,8 +2,11 @@ import { PrismaClient } from "@prisma/client";
 const db = new PrismaClient({ errorFormat: "minimal" });
 
 const include = {
-  material: true,
   category: true,
+  sub_category: true,
+  material: true,
+  style: true,
+  subject: true,
   sales_person: {
     select: {
       createdAt: true,
@@ -16,24 +19,29 @@ const include = {
   reviews: true
 };
 
-const _fetchProducts = async (query: any) => {
+function getWhereParams(query: any) {
   let {
     q,
-    p,
-    limit,
-    material,
     category,
+    collection,
+    sub_category,
+    subject,
+    style,
+    material,
     rating,
     discount,
     price_range,
-    orderBy
   }: any = query
 
   let minRating = rating && Math.min(...rating)
   let minDiscount = discount && Math.min(...discount)
 
-  let where = {
-    category: { name: category },
+  return {
+    category: { id: category },
+    collections: { id: collection },
+    sub_category: { name: { in: sub_category } },
+    subject: { name: { in: subject } },
+    style: { name: { in: style } },
     material: { name: { in: material } },
     rating: { gte: minRating },
     discount: { gte: minDiscount },
@@ -41,10 +49,19 @@ const _fetchProducts = async (query: any) => {
       gte: price_range?.min || undefined,
       lte: price_range?.max || undefined,
     },
-    // sales_person_id: facets?.seller_id,
     name: { search: q },
     id: { search: q },
   }
+}
+
+const _fetchProducts = async ({
+  p,
+  limit,
+  orderBy,
+  ...query
+}: any) => {
+
+  let where = getWhereParams(query)
 
   const data = await db.product.findMany({
     where,
@@ -57,122 +74,187 @@ const _fetchProducts = async (query: any) => {
   return data
 }
 
-const _fetchFilterParams = async (query: any) => {
-  let {
-    q,
-    material,
-    category,
-    rating,
-    price_range,
-  }: any = query
+const _fetchTopSellingProducts = async ({
+  p,
+  limit,
+  orderBy,
+  ...query
+}: any) => {
 
-  let minRating = rating && Math.min(...rating)
+  let where = getWhereParams(query)
 
-  let where = {
-    category: { name: category },
-    price: {
-      gte: price_range?.min || undefined,
-      lte: price_range?.max || undefined,
+  const data = await db.product.findMany({
+    where,
+    include: {
+      cart_item: {
+        select: { quantity: true }
+      },
+      ...include
     },
-    // sales_person_id: facets?.seller_id,
-    name: { search: q },
-    id: { search: q },
-  }
+    skip: (p - 1) * limit,
+    take: limit,
+    orderBy,
+  });
 
-  let wedgetItems = {
-    material: { name: { in: material } },
-    rating: { gte: minRating },
-  }
+  return data
+}
 
-  const data = await db.$transaction<any>([
+const _fetchFilterParams = async (query: any) => {
+  let where = getWhereParams(query)
+  
+  const [
+    { id: total },
+    { _min: { price: min }, _max: { price: max } },
+    categories,
+    mediums,
+    subjects,
+    styles,
+    materials,
+    ratings,
+    allCategories,
+    allMediums,
+    allSubjects,
+    allStyles,
+    allMaterials,
+    collections,
+    discounts
+  ] = await db.$transaction<any>([
+    //total items
     db.product.count({
       select: { id: true },
-      where: { ...where, ...wedgetItems },
+      where,
     }),
+    //min and max price
     db.product.aggregate({
       _min: { price: true },
       _max: { price: true },
-      where: { ...where, ...wedgetItems },
+      where: { ...where, price: undefined },
     }),
+    //available categories
     db.product.findMany({
       distinct: ['category_id'],
-      select: { category: { select: { name: true } } },
-      orderBy: { category: { name: 'asc' } }
+      select: { category: true },
+      orderBy: { category: { name: 'desc' } }
     }),
+    //available subcategories/medium
     db.product.findMany({
-      where,
+      distinct: ['subCategory_id'],
+      where: { ...where, sub_category: undefined },
+      select: { sub_category: true },
+      orderBy: { sub_category: { name: 'asc' } }
+    }),
+    //available subject
+    db.product.findMany({
+      distinct: ['subject_id'],
+      where: { ...where, subject: undefined },
+      select: { subject: true },
+      orderBy: { subject: { name: 'asc' } }
+    }),
+    //available style
+    db.product.findMany({
+      distinct: ['style_id'],
+      where: { ...where, style: undefined },
+      select: { style: true },
+      orderBy: { style: { name: 'asc' } }
+    }),
+    //available materials
+    db.product.findMany({
       distinct: ['material_id'],
-      select: { material: { select: { name: true } } },
+      where: { ...where, material: undefined },
+      select: { material: true },
       orderBy: { material: { name: 'asc' } }
     }),
+    //available ratings
     db.product.findMany({
-      where,
       distinct: ['rating'],
+      where: { ...where, rating: undefined },
       select: { rating: true },
       orderBy: { rating: 'asc' }
     }),
-    db.category.findMany({ orderBy: { name: 'asc' } }),
+
+    db.category.findMany({ orderBy: { name: 'desc' } }),
+    db.subCategory.findMany({ orderBy: { name: 'asc' } }),
+    db.subject.findMany({ orderBy: { name: 'asc' } }),
+    db.style.findMany({ orderBy: { name: 'asc' } }),
     db.material.findMany({ orderBy: { name: 'asc' } }),
-  ]);
-
-  let formatedData = {
-    total: Object.values(data[0])[0],
-    priceRange: {
-      min: data[1]._min.price,
-      max: data[1]._max.price,
-    },
-    categories: data[2].map(({ category }: any) => category.name),
-    materials: data[3].map(({ material }: any) => material.name),
-    ratings: data[4],
-    allCategories: data[5],
-    allMaterials: data[6],
-  }
-
-  return formatedData
-}
-const _fetchCategories = async (query: any) => {
-  let {
-    q,
-    material,
-    category,
-    rating,
-    price_range,
-  }: any = query
-
-  let minRating = rating && Math.min(...rating)
-
-  let where = {
-    category: { name: category },
-    price: {
-      gte: price_range?.min || undefined,
-      lte: price_range?.max || undefined,
-    },
-    // sales_person_id: facets?.seller_id,
-    name: { search: q },
-    id: { search: q },
-  }
-
-  let wedgetItems = {
-    material: { name: { in: material } },
-    rating: { gte: minRating },
-  }
-
-  const data = await db.$transaction<any>([
-    db.product.findMany({
-      distinct: ['category_id'],
-      select: { category: { select: { name: true } } },
-      orderBy: { category: { name: 'asc' } }
+    db.collections.findMany({
+      include: { _count: { select: { product: true } } },
+      orderBy: { name: 'asc' }
     }),
-    db.category.findMany({ orderBy: { name: 'asc' } }),
+    //available ratings
+    db.product.findMany({
+      distinct: ['discount'],
+      where: { ...where, discount: undefined },
+      select: { discount: true },
+      orderBy: { discount: 'asc' }
+    }),
   ]);
 
-  let formatedData = {
-    categories: data[0].map(({ category }: any) => category.name),
-    allCategories: data[1],
+  return {
+    total,
+    priceRange: {
+      min,
+      max
+    },
+    categories,
+    mediums,
+    subjects,
+    styles,
+    materials,
+    ratings,
+    allCategories,
+    allMediums,
+    allSubjects,
+    allStyles,
+    allMaterials,
+    collections,
+    discounts
   }
 
-  return formatedData
 }
+// const _fetchCategories = async (query: any) => {
+//   let {
+//     q,
+//     material,
+//     category,
+//     rating,
+//     price_range,
+//   }: any = query
+
+//   let minRating = rating && Math.min(...rating)
+
+//   let where = {
+//     category: { name: category },
+//     price: {
+//       gte: price_range?.min || undefined,
+//       lte: price_range?.max || undefined,
+//     },
+//     // sales_person_id: facets?.seller_id,
+//     name: { search: q },
+//     id: { search: q },
+//   }
+
+//   let wedgetItems = {
+//     material: { name: { in: material } },
+//     rating: { gte: minRating },
+//   }
+
+//   const data = await db.$transaction<any>([
+//     db.product.findMany({
+//       distinct: ['category_id'],
+//       select: { category: { select: { name: true } } },
+//       orderBy: { category: { name: 'asc' } }
+//     }),
+//     db.category.findMany({ orderBy: { name: 'asc' } }),
+//   ]);
+
+//   let formatedData = {
+//     categories: data[0].map(({ category }: any) => category.name),
+//     allCategories: data[1],
+//   }
+
+//   return formatedData
+// }
 
 const _fetchAdminProducts = async (
   userId: string,
@@ -247,5 +329,6 @@ export {
   _updateProduct,
   _searchProduct,
   _fetchFilterParams,
-  _fetchCategories
+  // _fetchCategories,
+  _fetchTopSellingProducts
 };
