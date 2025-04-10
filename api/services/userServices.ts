@@ -38,7 +38,14 @@ const _getUserById = async (id: string) => {
       social: true,
       sales_order_personTosales_order_customer_id: { include: { cart_item: { include: { product: true } } } },
       wishlist: { include: { product: true } },
-      cart: { include: { product: true } }
+      cart: { include: { product: true } },
+      product: {
+        include: {
+          sales_person: true
+        }
+      },
+      followers: true,
+      following: true
     },
   });
 
@@ -124,6 +131,51 @@ const _addToRV = async (data: any) => {
   return res;
 };
 
+//artists/////////////////
+
+const _getArtists = async () => {
+  let selectedItems = {
+    product: true,
+    displayName: true,
+    photo: true,
+    id: true,
+    email: true,
+    social: true,
+    followers: true
+  }
+
+  let data: any = await db.user.findMany({
+    // where:{
+    //   role:'seller'
+    // }
+    select: selectedItems
+  });
+
+  delete data.password
+  return data
+}
+
+interface AF {
+  userId: string,
+  followingUserId: string
+}
+
+const _addFollower = (userId: string, followingUserId: string) => {
+
+  return db.followers.create({
+    data: {
+      userId,
+      followingUserId
+    }
+  })
+}
+
+const _removeFollower = (id: string) => {
+  return db.followers.delete({
+    where: { id }
+  })
+}
+
 export {
   _signupUser,
   _getUserByEmail,
@@ -139,4 +191,8 @@ export {
 
   _addSocialMediaLink,
   _removeSocialMediaLink,
+
+  _getArtists,
+  _addFollower,
+  _removeFollower
 };

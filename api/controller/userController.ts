@@ -9,7 +9,10 @@ import {
   _addToRV,
   _getUserById,
   _addSocialMediaLink,
-  _removeSocialMediaLink
+  _removeSocialMediaLink,
+  _getArtists,
+  _addFollower,
+  _removeFollower
 } from "../services/userServices";
 
 import bcrypt from "bcrypt";
@@ -28,7 +31,11 @@ const getUserById = async (req: any, res: any, next: any) => {
   const id = req.params.id
 
   _getUserById(id)
-    .then((data) => res.json(data))
+    .then((data) => {
+      let isFollowed = data.followers.some((user: any) => user?.userId === req.user?.id)
+      data.isFollowedByCurrentUser = isFollowed
+      res.json(data)
+    })
     .catch((err) => next(err));
 }
 
@@ -243,6 +250,30 @@ const removeSocialMediaLink = (req: any, res: any, next: any) => {
     .catch(next)
 }
 
+//atrists/////////////////////////////
+
+const getArtists = async (req: any, res: any, next: any) => {
+  _getArtists()
+    .then((data) => res.json(data))
+    .catch((err) => next(err));
+}
+const addFollower = async (req: any, res: any, next: any) => {
+  const userId = req.user?.id
+  const followingUserId = req.params?.id
+
+  _addFollower(userId, followingUserId)
+    .then((data) => res.json(data))
+    .catch((err) => next(err));
+}
+
+const removeFollower = async (req: any, res: any, next: any) => {
+  const id = req.params?.id
+
+  _removeFollower(id)
+    .then((data) => res.json(data))
+    .catch((err) => next(err));
+}
+
 export default {
   getUserById,
   signupUser,
@@ -261,5 +292,9 @@ export default {
   addToRV,
 
   addSocialMediaLink,
-  removeSocialMediaLink
+  removeSocialMediaLink,
+
+  getArtists,
+  addFollower,
+  removeFollower
 };
