@@ -12,6 +12,7 @@ const {
   updateUser,
   addUserAddress,
   deleteUserAddress,
+  updateUserAddress,
 
   getUserWishlist,
   addToWishlist,
@@ -23,14 +24,16 @@ const {
 
   getArtists,
   addFollower,
-  removeFollower
+  removeFollower,
 } = userController
 
 const { fetchAdminProducts } = productController
 
 const userRouter = express.Router();
 
-userRouter.get("/", (req, res) => res.send(req.user));
+userRouter.get("/", (req, res) => {
+  res.send(req.user)
+});
 userRouter.get("/artists", getArtists);
 userRouter.post("/artists/follow/:id", addFollower);
 userRouter.delete("/artists/unfollow/:id", removeFollower);
@@ -53,7 +56,7 @@ userRouter.post("/social", addSocialMediaLink);
 userRouter.delete("/social/:id", removeSocialMediaLink);
 
 userRouter.get("/:id", getUserById);
-// userRouter.put("/address", updateUserAddress);
+userRouter.put("/address", updateUserAddress);
 
 /*---------------------->> ERROR HANDLER <<----------------------*/
 

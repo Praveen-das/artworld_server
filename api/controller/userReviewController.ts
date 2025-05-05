@@ -1,4 +1,4 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import services from "../services/userReviewServices";
 import { prismaErrorHandler } from "../utils/PrismaErrorHandler";
 

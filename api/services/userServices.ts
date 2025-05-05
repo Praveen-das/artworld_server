@@ -10,6 +10,7 @@ const _getUserByEmail = async (email: string, provider: any = 'web') => {
   const data = await db.user.findFirst({
     where: { email, provider: provider },
     include: {
+      default_address: true,
       address: { orderBy: { createdAt: 'desc' } },
       social: true
     },
@@ -22,19 +23,20 @@ const _getUserById = async (id: string) => {
   const data: any = await db.user.findUnique({
     where: { id },
     include: {
+      default_address: true,
       address: { orderBy: { createdAt: 'desc' } },
-      recently_viewed: {
-        orderBy: { createdAt: 'desc' },
-        include: {
-          product: {
-            include: {
-              material: true,
-              category: true,
-              sales_person: true
-            }
-          },
-        }
-      },
+      // recently_viewed: {
+      //   orderBy: { createdAt: 'desc' },
+      //   include: {
+      //     product: {
+      //       include: {
+      //         material: true,
+      //         category: true,
+      //         sales_person: true
+      //       }
+      //     },
+      //   }
+      // },
       social: true,
       sales_order_personTosales_order_customer_id: { include: { cart_item: { include: { product: true } } } },
       wishlist: { include: { product: true } },
@@ -45,7 +47,8 @@ const _getUserById = async (id: string) => {
         }
       },
       followers: true,
-      following: true
+      following: true,
+      linked_account: true
     },
   });
 
@@ -74,16 +77,22 @@ interface links {
 }
 
 const _addSocialMediaLink = async (id: string, links: Array<links>) => {
-  let data: any = links.map((link: any) => {
-    return db.social.upsert({
-      create: {
-        ...link,
-        user_id: id
-      },
-      update: link,
-      where: { user_id_name: { user_id: id, name: link.name } }
-    })
-  })
+  let data: any = links.reduce((array: any, link: any) => {
+    if (link.url) {
+      let transaction = db.social.upsert({
+        create: {
+          ...link,
+          user_id: id
+        },
+        update: link,
+        where: { user_id_name: { user_id: id, name: link.name } }
+      })
+
+      array.push(transaction)
+    }
+
+    return array
+  }, [])
 
   return await db.$transaction(data)
 }
@@ -101,13 +110,13 @@ const _addUserAddress = async (address: any) => {
   }
 };
 
-const _updateUserAddress = async (id: string, address: any) => {
-  // const data = await db.address.update({ data: address, where: { id } });
-  // return data;
-};
-
 const _deleteUserAddress = async (id: string) => {
   const data = await db.address.delete({ where: { id } });
+  return data;
+};
+
+const _updateUserAddress = async (id: string, address: any) => {
+  const data = await db.address.update({ where: { id }, data: address });
   return data;
 };
 
@@ -183,6 +192,7 @@ export {
   _updateUser,
   _addUserAddress,
   _deleteUserAddress,
+  _updateUserAddress,
 
   _addToWishlist,
   _getUserWishlist,
