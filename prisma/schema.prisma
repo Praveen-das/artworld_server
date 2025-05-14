@@ -45,9 +45,9 @@ model linked_account {
   id        String                @id @unique @default(uuid())
   status    linked_account_status @default(not_active)
   accountId String
-  
-  user      User                  @relation(fields: [userId], references: [id])
-  userId    String                @unique
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
 }
 
 model Followers {
@@ -235,15 +235,14 @@ model cart_item {
 model sales_order {
   timer_order_taken DateTime     @default(dbgenerated("NOW()"))
   status            status_type? @default(pending)
-  payment_method    payment_type @default(card)
+  cart_item_id      String
+  customer_id       String
+  seller_id         String
   id                String       @id @default(uuid())
 
   cart_item                              cart_item @relation(fields: [cart_item_id], references: [id])
-  cart_item_id                           String
   person_personTosales_order_customer_id User      @relation("personTosales_order_customer_id", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer_id                            String
   person_personTosales_order_seller_id   User      @relation("personTosales_order_seller_id", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  seller_id                              String
 }
 
 // ---------------MESSENGER------------------------------------------------------
@@ -286,13 +285,6 @@ enum linked_account_status {
 enum user_role {
   user
   seller
-}
-
-enum payment_type {
-  card
-  cod
-  net_banking
-  upi
 }
 
 enum provider_type {

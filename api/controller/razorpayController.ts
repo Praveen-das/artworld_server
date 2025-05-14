@@ -1,19 +1,92 @@
-import { _createLinkedAccount, _createOrder, _getLinkedAccounts, _verify } from "../services/razorpayServices";
+import { _createLinkedAccount, _createOrderAndTransferAmount, _createOrderForSellerRegistration, _getLinkedAccounts, _verify } from "../services/razorpayServices";
 import { _getUserById, _updateUser } from "../services/userServices";
-import { } from 'razorpay'
+import { Transfer } from "../types/razorpay";
+import cartServices from '../services/cartServices'
+import { _createSalesOrder } from "../services/salesOrderServices";
+import { sendOrderConfirmationMail } from "../services/nodeMailer";
+
+const { _fetchUserCart } = cartServices
 
 function createOrder(req: any, res: any, next: any) {
-    _createOrder()
+    _createOrderForSellerRegistration()
         .then(response => res.json(response))
         .catch(err => res.send(err))
 }
 
-async function verify(req: any, res: any, next: any) {
+type CartResponse = {
+    total_amount: any,
+    overall: any,
+}
+
+async function createOrderAndTransferAmount(req: any, res: any, next: any) {
+    const user_id = req.user?.id || '118373901310816826366'
+    const [cart_items, cart]: any = await _fetchUserCart(user_id)
+
+    const accounts = cart_items?.map((item: any) => (
+        {
+            account: item?.product?.sales_person?.linked_account?.accountId,
+            amount: item?.price * 100,
+            currency: 'INR',
+            on_hold: false
+        }
+    ))
+
+    const transfers: Transfer = {
+        total_amount: cart?.total_price,
+        accounts
+    }
+
+    _createOrderAndTransferAmount(transfers)
+        .then(response => {
+            res.json(response)
+        })
+        .catch(err => {
+            console.log('error---------->', err);
+            res.send(err)
+        })
+}
+
+async function verifyRegistration(req: any, res: any, next: any) {
     const userId = req.user.id;
 
-    _verify(userId, req.body)
-        .then(response => res.redirect('http://localhost:3000/seller/onboarding'))
+    _verify(req.body)
+        .then(async () => {
+            await _updateUser(userId, { role: 'seller' })
+            res.redirect('http://localhost:3000/seller/onboarding')
+        })
         .catch(err => res.redirect('http://localhost:3000/seller/failed'))
+}
+
+async function createSalesOrder(userId: string) {
+    const [cart_items]: any = await _fetchUserCart(userId)
+
+    const orders = []
+
+    for (let cart of cart_items) {
+        const order = {
+            cart_item_id: cart.id,
+            customer_id: userId,
+            seller_id: cart.product.sales_person_id,
+        }
+        orders.push(order)
+    }
+
+    return await _createSalesOrder(orders)
+}
+
+async function verifyPurchase(req: any, res: any, next: any) {
+    const userId = req.user.id;
+
+    _verify(req.body)
+        .then(async () => {
+            await createSalesOrder(userId)
+            await sendOrderConfirmationMail({ username: req.user.displayName })
+            res.redirect('http://localhost:3000/purchase/success')
+        })
+        .catch((err) => {
+            console.log(err);
+            res.redirect('http://localhost:3000/seller/failed')
+        })
 }
 
 async function createLinkedAccount(req: any, res: any, next: any) {
@@ -21,7 +94,7 @@ async function createLinkedAccount(req: any, res: any, next: any) {
         userId: req.user.id,
         ...req.body
     }
-    
+
     _createLinkedAccount(payload)
         .then(response => res.json(response.data))
         .catch(err => res.status(400).send(err.response.data))
@@ -35,7 +108,9 @@ async function getLinkedAccounts(req: any, res: any, next: any) {
 
 export default {
     createOrder,
-    verify,
+    createOrderAndTransferAmount,
+    verifyRegistration,
+    verifyPurchase,
     createLinkedAccount,
-    getLinkedAccounts
+    getLinkedAccounts,
 }

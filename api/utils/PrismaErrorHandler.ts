@@ -1,14 +1,38 @@
 export const prismaErrorHandler = (err: any, next: any) => {
-  if (err.code === "P2002") {
-    let message = err.meta.target[0];
-    message = message[0].toUpperCase() + message.slice(1);
 
-    return next({
-      error: {
-        field: message,
-        message: `${message} already exists`,
-      },
-      code: 403,
-    });
+  switch (err.code) {
+    case "P2002": {
+      let target = err.meta.target[0];
+      target = target[0].toUpperCase() + target.slice(1);
+
+      return {
+        error: {
+          field: target,
+          message: `${target} already exists`,
+        },
+        code: 403,
+      };
+    }
+
+    case "P2000": {
+      let target = err.meta.column_name;
+
+      return {
+        error: {
+          field: target,
+          message: `${target} too long`,
+        },
+        code: 400,
+      };
+    }
+
+    default:
+      return {
+        error: {
+          field: 'Unknown',
+          message: 'Unknown error',
+        },
+        code: 404,
+      };
   }
 };

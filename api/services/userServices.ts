@@ -102,12 +102,7 @@ const _removeSocialMediaLink = async (id: string) => {
 }
 
 const _addUserAddress = async (address: any) => {
-  try {
-    const data = await db.address.create({ data: address });
-    return data;
-  } catch (error) {
-    console.log(error);
-  }
+  return await db.address.create({ data: address });
 };
 
 const _deleteUserAddress = async (id: string) => {
@@ -154,9 +149,9 @@ const _getArtists = async () => {
   }
 
   let data: any = await db.user.findMany({
-    // where:{
-    //   role:'seller'
-    // }
+    where: {
+      role: 'seller'
+    },
     select: selectedItems
   });
 
@@ -170,7 +165,6 @@ interface AF {
 }
 
 const _addFollower = (userId: string, followingUserId: string) => {
-
   return db.followers.create({
     data: {
       userId,

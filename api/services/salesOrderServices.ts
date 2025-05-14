@@ -2,7 +2,11 @@ import { PrismaClient } from "@prisma/client";
 const db = new PrismaClient({ errorFormat: "minimal" });
 
 export async function _createSalesOrder(orders: any) {
-    return await db.sales_order.createMany({ data: orders })
+    return await Promise.all(
+        orders.map(async (order: any) => (
+            await db.sales_order.create({ data: order })
+        ))
+    )
 }
 
 export async function _getSalesOrderByUserId(id: string, query: null) {
@@ -37,7 +41,7 @@ export async function _getSalesOrderByUserId(id: string, query: null) {
     })
 
     const dailyEarnings = tt.reduce((x, y) => x += y.cart_item.price, 0)
-    
+
     data.push({ dailyEarnings })
 
     return data

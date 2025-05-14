@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 import path from 'path'
-import formidable from 'formidable'
 
 import corsOptions from "./api/config/cors/corsOptions";
 
@@ -22,8 +21,13 @@ import initializeSocket from './api/services/socketIO'
 import product from "./api/root"
 import test from "./api/test/test"
 
+// import { engine } from 'express-handlebars';
+
 const app = express();
 // const httpServer = createServer(app)
+
+// app.engine('handlebars', engine());
+// app.set('view engine', 'handlebars');
 
 initializePassport(passport);
 
@@ -51,33 +55,8 @@ app.use(passport.session());
 
 // /*----------->> ROUTERS <<-----------*/
 
-app.post('/save', (req, res, next) => {
-  const form = formidable({ multiples: false });
-
-  console.log("BEGIN /save");
-  console.log(`req: ${JSON.stringify(req.body)}`);
-
-  form.parse(req, (err, fields, files: any) => {
-    // console.log(files);
-
-  });
-})
-
-app.post('/upload', (req, res, next) => {
-  const form = formidable({ multiples: true });
-
-  form.parse(req, (err, fields, files: any) => {
-    if (err) {
-      console.log(err);
-      next(err);
-      return;
-    }
-    let theFile = files.files.filepath;
-    // console.log(theFile);
-    
-    res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': 'http://localhost:3000' });
-    res.end(theFile);
-  });
+app.get('/email', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views','emails.html'))
 })
 
 app.use('/', root)
