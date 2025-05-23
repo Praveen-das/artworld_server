@@ -1,4 +1,4 @@
-import services from "../services/cartServices";
+import services from "../Services/cartServices";
 
 const {
     _fetchUserCart,

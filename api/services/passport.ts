@@ -3,7 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as TwitterStrategy } from "passport-twitter";
 import bcrypt from "bcrypt";
-import { _getUserById, _getUserByEmail, _signupUser } from "./userServices";
+import { _getUserById, _getUserByEmail, _createUser } from "./userServices";
 
 const initializePassport = (passport: any) => {
   passport.use(localStrategy());
@@ -16,8 +16,13 @@ const initializePassport = (passport: any) => {
   });
 
   passport.deserializeUser(async (id: any, done: any) => {
-    const user = await _getUserById(id);
-    return done(null, user);
+    try {
+      const user = await _getUserById(id);
+      return done(null, user);
+    } catch (error) {
+      console.log(error);
+
+    }
   });
 };
 
@@ -65,22 +70,27 @@ function googleStrategy() {
       callbackURL: "/auth/google/redirect",
     },
     async (_, __, profile, done) => {
-      const user = await _getUserById(profile.id);
+      try {
+        const user = await _getUserById(profile.id);
 
-      if (!user) {
-        _signupUser({
-          displayName: profile.displayName,
-          email: profile.emails ? profile.emails[0].value : null,
-          photo: profile.photos ? profile.photos[0].value : "",
-          provider: profile.provider,
-          id: profile.id,
-        })
-          .then((user) => {
-            done(null, user);
+        if (!user) {
+          _createUser({
+            displayName: profile.displayName,
+            email: profile.emails ? profile.emails[0].value : null,
+            photo: profile.photos ? profile.photos[0].value : "",
+            provider: profile.provider,
+            id: profile.id,
           })
-          .catch((err) => console.log(err));
-      } else {
-        done(null, user);
+            .then((user) => {
+              done(null, user);
+            })
+            .catch((err) => console.log(err));
+        } else {
+          done(null, user);
+        }
+      } catch (error) {
+        console.log(error);
+        
       }
     }
   );
@@ -98,7 +108,7 @@ function facebookStrategy() {
       const user = await _getUserById(profile.id);
 
       if (!user) {
-        _signupUser({
+        _createUser({
           displayName: profile.displayName,
           email: profile.emails ? profile.emails[0].value : null,
           photo: profile.photos ? profile.photos[0].value : "",

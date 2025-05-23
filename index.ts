@@ -9,30 +9,22 @@ import root from './api/root'
 import userRouter from "./api/routes/userRouter";
 import productRouter from "./api/routes/products";
 import imageKitRouter from "./api/routes/imageKit";
-import initializePassport from "./api/services/passport";
+import initializePassport from "./api/Services/passport";
 import passport from "passport";
 import authenticationRouter from "./api/routes/OAuthRouter";
 import userCart from "./api/routes/userCart";
 import userReviews from "./api/routes/userReviews";
 import payments from "./api/routes/payments";
 import salesOrder from "./api/routes/salesOrder";
-import initializeSocket from './api/services/socketIO'
-
-import product from "./api/root"
-import test from "./api/test/test"
-
-// import { engine } from 'express-handlebars';
+import initializeSocket from './api/Services/socketIO'
+import { checkAuth } from "./api/middleware/authentication";
 
 const app = express();
-// const httpServer = createServer(app)
-
-// app.engine('handlebars', engine());
-// app.set('view engine', 'handlebars');
 
 initializePassport(passport);
 
 // /*----------->> MIDDLEWARES <<-----------*/
-app.use('/', express.static(path.join(__dirname, '/public')))
+// app.use('/', express.static(path.join(__dirname, '/public')))
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -55,23 +47,20 @@ app.use(passport.session());
 
 // /*----------->> ROUTERS <<-----------*/
 
-app.get('/email', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views','emails.html'))
-})
 
 app.use('/', root)
-app.use("/api/product", product);
-app.use("/auth", authenticationRouter);
 app.use("/products", productRouter);
-app.use("/user", userRouter);
-app.use("/cart", userCart);
-app.use("/imagekit", imageKitRouter);
 app.use("/reviews", userReviews);
+app.use("/user", userRouter);
+app.use("/auth", authenticationRouter);
+app.use("/imagekit", imageKitRouter);
+
+app.use(checkAuth)
+
+app.get("/health", (_, res) => res.send('ok'));
+app.use("/cart", userCart);
 app.use("/rzp", payments);
 app.use("/orders", salesOrder);
-
-app.use("/api/product", product);
-app.use("/api/test", test);
 
 app.all('*', (_, res) => {
   res.status(404)

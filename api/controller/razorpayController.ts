@@ -1,9 +1,9 @@
-import { _createLinkedAccount, _createOrderAndTransferAmount, _createOrderForSellerRegistration, _getLinkedAccounts, _verify } from "../services/razorpayServices";
-import { _getUserById, _updateUser } from "../services/userServices";
+import { _createLinkedAccount, _createOrderAndTransferAmount, _createOrderForSellerRegistration, _getLinkedAccounts, _verify } from "../Services/razorpayServices";
+import { _updateUser } from "../Services/userServices";
 import { Transfer } from "../types/razorpay";
-import cartServices from '../services/cartServices'
-import { _createSalesOrder } from "../services/salesOrderServices";
-import { sendOrderConfirmationMail } from "../services/nodeMailer";
+import cartServices from '../Services/cartServices'
+import { _createSalesOrder } from "../Services/salesOrderServices";
+import { sendOrderConfirmationMail } from "../Services/nodeMailer";
 
 const { _fetchUserCart } = cartServices
 

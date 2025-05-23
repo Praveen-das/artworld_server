@@ -1,12 +1,12 @@
-import express from "express";
+import { Router } from "express";
 import passport from "passport";
 import userController from "../controller/userController";
 import productController from '../controller/productController'
-import { auth } from "../services/globalServices";
+import { checkAuth } from "../middleware/authentication";
 
 const {
   getUserById,
-  signupUser,
+  createUser,
   signinUser,
   logoutUser,
   updateUser,
@@ -29,34 +29,33 @@ const {
 
 const { fetchAdminProducts } = productController
 
-const userRouter = express.Router();
+const userRouter = Router();
 
-userRouter.get("/", (req, res) => {
-  res.send(req.user)
-});
+userRouter.get("/", (req, res) => res.send(req.user));
+
 userRouter.get("/artists", getArtists);
 userRouter.post("/artists/follow/:id", addFollower);
 userRouter.delete("/artists/unfollow/:id", removeFollower);
-userRouter.put("/update", updateUser);
-userRouter.post("/signup", signupUser);
-userRouter.post("/signin", passport.authenticate("local"), signinUser);
-userRouter.get("/logout", logoutUser);
-userRouter.get("/products", fetchAdminProducts);
-
-userRouter.post("/address", addUserAddress);
-userRouter.delete("/address/:id", deleteUserAddress);
-
 userRouter.get("/wishlist", getUserWishlist);
 userRouter.post("/wishlist/add/:id", addToWishlist);
 userRouter.delete("/wishlist/remove/:id", removeFromWishlist);
+userRouter.post("/signin", passport.authenticate("local"), signinUser);
+
+userRouter.post("/create", createUser);
+userRouter.put("/update", checkAuth, updateUser);
+userRouter.get("/logout", logoutUser);
+userRouter.get("/products", checkAuth, fetchAdminProducts);
+
+userRouter.post("/address", addUserAddress);
+userRouter.delete("/address/:id", checkAuth, deleteUserAddress);
 
 userRouter.post("/rv/add/:id", addToRV);
 
 userRouter.post("/social", addSocialMediaLink);
-userRouter.delete("/social/:id", removeSocialMediaLink);
+userRouter.delete("/social/:id",checkAuth, removeSocialMediaLink);
 
-userRouter.get("/:id", getUserById);
 userRouter.put("/address", updateUserAddress);
+userRouter.get("/:id", getUserById);
 
 /*---------------------->> ERROR HANDLER <<----------------------*/
 

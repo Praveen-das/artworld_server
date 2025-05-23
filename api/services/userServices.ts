@@ -1,6 +1,6 @@
 import db from "../config/prismaClient";
 
-const _signupUser = async (credentials: any) => {
+const _createUser = async (credentials: any) => {
   return await db.user.create({
     data: credentials,
   });
@@ -180,7 +180,7 @@ const _removeFollower = (id: string) => {
 }
 
 export {
-  _signupUser,
+  _createUser,
   _getUserByEmail,
   _getUserById,
   _updateUser,
