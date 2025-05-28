@@ -5,7 +5,7 @@ import axiosClient from './libs/axiosClient';
 import db from "../config/prismaClient";
 import { Transfer } from '../types/razorpay';
 import { _createSalesOrder } from './salesOrderServices';
-import cartServices from '../Services/cartServices'
+import cartServices from '../services/cartServices'
 
 const { _fetchUserCart } = cartServices
 

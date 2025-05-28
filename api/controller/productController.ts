@@ -9,7 +9,7 @@ import {
   _fetchFilterParams,
   // _fetchCategories,
   _fetchTopSellingProducts
-} from "../Services/productServices";
+} from "../services/productServices";
 import QueryValidator from './Utils/QueryValidator'
 
 const fetchProducts = (req: any, res: any, next: any) => {
