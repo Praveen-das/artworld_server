@@ -1,5 +1,5 @@
 import passport from "passport";
-import { SERVER_URL } from "../utils/urls";
+import { CLIENT_URL } from "../utils/urls";
 
 //------------------------GOOGLE------------------------//
 
@@ -11,8 +11,8 @@ const googleAuth = (req: any, res: any, next: any) => {
 
 const googleAuthRedirect = (req: any, res: any, next: any) => {
   return passport.authenticate("google", {
-    successRedirect: SERVER_URL,
-    failureRedirect: `${SERVER_URL}/login`,
+    successRedirect: CLIENT_URL,
+    failureRedirect: `${CLIENT_URL}/login`,
   })(req, res, next);
 };
 
@@ -26,8 +26,8 @@ const facebookAuth = (req: any, res: any, next: any) => {
 
 const facebookAuthRedirect = (req: any, res: any, next: any) => {
   return passport.authenticate("facebook", {
-    successRedirect: SERVER_URL,
-    failureRedirect: `${SERVER_URL}/login`,
+    successRedirect: CLIENT_URL,
+    failureRedirect: `${CLIENT_URL}/login`,
   })(req, res, next);
 };
 

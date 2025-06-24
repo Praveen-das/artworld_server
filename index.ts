@@ -18,15 +18,13 @@ import payments from "./api/routes/payments";
 import salesOrder from "./api/routes/salesOrder";
 import initializeSocket from './api/services/socketIO'
 import { checkAuth } from "./api/middleware/authentication";
-import { SERVER_URL } from "./api/utils/urls";
-
 
 const app = express();
 
 initializePassport(passport);
 
 // /*----------->> MIDDLEWARES <<-----------*/
-// app.use('/', express.static(path.join(__dirname, '/public')))
+app.use('/', express.static(path.join(__dirname, '/public')))
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -64,7 +62,6 @@ app.use("/rzp", payments);
 app.use("/orders", salesOrder);
 
 app.all('*', (_, res) => {
-  res.status(404)
   res.sendFile(path.join(__dirname, 'views', '404.html'))
 })
 

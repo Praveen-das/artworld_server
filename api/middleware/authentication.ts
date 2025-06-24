@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { SERVER_URL } from '../utils/urls';
+import { CLIENT_URL } from '../utils/urls';
 
 export function WWWAuthentication(req: any, res: any, next: any) {
     const authheader = req.headers.authorization;
@@ -45,7 +45,7 @@ function validCredentials(username: string, password: string) {
 
 export function checkAuth(req: Request, res: Response, next: NextFunction) {
     if (req.isAuthenticated()) {
-        res.header("Access-Control-Allow-Origin", SERVER_URL);
+        res.header("Access-Control-Allow-Origin", CLIENT_URL);
         res.header(
             "Access-Control-Allow-Headers",
             "Origin, X-Requested-With, Content-Type, Accept"
