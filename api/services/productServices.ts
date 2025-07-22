@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-const db = new PrismaClient({ errorFormat: "minimal" });
+const db = new PrismaClient();
 
 const include = {
   category: true,
