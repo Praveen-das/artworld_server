@@ -1,10 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-const client = new PrismaClient({
-    datasources: {
-        db: {
-            url: process.env.DATABASE_URL
-        }
-    }
-});
+const client = new PrismaClient();
 
 export default client
