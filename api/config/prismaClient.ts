@@ -7,7 +7,8 @@ declare global {
 }
 
 let client: PrismaClient
-console.log(`${tmpdir()}/ca.pem`);
+
+const DATABASE_URL = `${process.env.DATABASE_URL}?sslmode=require&sslcert=${tmpdir()}/ca.pem`
 
 if (!global.prisma) {
     fs.writeFile(
@@ -17,9 +18,11 @@ if (!global.prisma) {
             if (err) return console.log(err)
         }
     )
-    global.prisma = new PrismaClient();
+    global.prisma = new PrismaClient({ datasources: { db: { url: DATABASE_URL } } });
 }
 
 client = global.prisma
+
+// const client = new PrismaClient()
 
 export default client

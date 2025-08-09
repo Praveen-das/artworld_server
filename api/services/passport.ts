@@ -2,7 +2,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as TwitterStrategy } from "passport-twitter";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { _getUserById, _getUserByEmail, _createUser } from "./userServices";
 
 const initializePassport = (passport: any) => {

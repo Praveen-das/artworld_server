@@ -1,5 +1,6 @@
 import { Router } from "express";
 import controller from "../controller/productController";
+import { checkAuth } from "../middleware/authentication";
 
 const router = Router();
 
@@ -29,7 +30,10 @@ router.get("/latest", (req, res, next) => {
   fetchProducts(req, res, next)
 });
 
-router.route("/:id")
+router.use(checkAuth)
+
+router
+  .route("/:id")
   .get(fetchProductById)
   .put(updateProduct)
   .delete(removeProduct);
