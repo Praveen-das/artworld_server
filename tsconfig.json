@@ -1,13 +1,22 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Default",
   "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "incremental": false,
+    "isolatedModules": true,
+    "lib": ["ES2020"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022",
+
     "sourceMap": true,
     "outDir": "build",
-    "strict": true,
-    "lib": [
-      "esnext",
-      "es2016",
-      "dom" 
-    ],
-    "esModuleInterop": true,
   }
 }

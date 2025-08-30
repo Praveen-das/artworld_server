@@ -1,6 +1,5 @@
 import { Router } from "express";
 import controller from "../controller/productController";
-import { checkAuth } from "../middleware/authentication";
 
 const router = Router();
 
@@ -12,7 +11,7 @@ const {
   updateProduct,
   searchProductByName,
   fetchFilterParams,
-  fetchTopSellingProducts
+  fetchTopSellingProducts,
 } = controller;
 
 router.get("/", fetchProducts);
@@ -25,19 +24,12 @@ router.get("/topselling", fetchTopSellingProducts);
 
 router.get("/latest", (req, res, next) => {
   req.query.orderBy = {
-    createdAt: 'desc'
-  }
-  fetchProducts(req, res, next)
+    createdAt: "desc",
+  };
+  fetchProducts(req, res, next);
 });
 
-router.use(checkAuth)
-
-router
-  .route("/:id")
-  .get(fetchProductById)
-  .put(updateProduct)
-  .delete(removeProduct);
-
+router.route("/:id").get(fetchProductById).put(updateProduct).delete(removeProduct);
 
 /*----------->> ERROR HANDLER <<-----------*/
 router.use((err: any, req: any, res: any, next: any) => {

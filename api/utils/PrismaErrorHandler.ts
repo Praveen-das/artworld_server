@@ -1,5 +1,4 @@
-export const prismaErrorHandler = (err: any, next: any) => {
-
+export const prismaErrorHandler = (err: any) => {
   switch (err.code) {
     case "P2002": {
       let target = err.meta.target[0];
@@ -27,12 +26,6 @@ export const prismaErrorHandler = (err: any, next: any) => {
     }
 
     default:
-      return {
-        error: {
-          field: 'Unknown',
-          message: 'Unknown error',
-        },
-        code: 404,
-      };
+      return err;
   }
 };

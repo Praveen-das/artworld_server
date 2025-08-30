@@ -1,15 +1,29 @@
 import express from "express";
-import controller from '../controller/razorpayController'
+import controller from "../controller/razorpayController";
 
-const router = express.Router()
+const router = express.Router();
 
-const { createOrder, createOrderAndTransferAmount, verifyRegistration, verifyPurchase, getLinkedAccounts, createLinkedAccount } = controller
+const {
+  createRegistrationOrder,
+  createOrder,
+  createOrderAndTransferAmount,
+  verifyRegistration,
+  verifyPurchase,
+  getLinkedAccounts,
 
-router.get('/accounts', getLinkedAccounts)
-router.post('/accounts', createLinkedAccount)
-router.post('/orders/registration', createOrder)
-router.post('/orders/purchase', createOrderAndTransferAmount)
-router.post('/registration/verify', verifyRegistration)
-router.post('/purchase/verify', verifyPurchase)
+  createLinkedAccount,
+  createProductConfiguration,
+} = controller;
 
-export default router
+router.get("/accounts", getLinkedAccounts);
+router.post("/accounts", createLinkedAccount);
+router.post("/product", createProductConfiguration);
+
+router.post("/orders/create", createOrder);
+router.post("/orders/registration", createOrder);
+router.post("/orders/purchase", createOrderAndTransferAmount);
+router.post("/registration/create-order", createRegistrationOrder);
+router.post("/registration/verify", verifyRegistration);
+router.post("/purchase/verify", verifyPurchase);
+
+export default router;
