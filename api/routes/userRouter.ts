@@ -1,8 +1,8 @@
 import { Router } from "express";
-import passport from "passport";
 import userController from "../controller/userController";
-import productController from '../controller/productController'
+import productController from "../controller/productController";
 import { checkAuth } from "../middleware/authentication";
+import signInMiddleware from "../middleware/signInMiddleware";
 
 const {
   getUserById,
@@ -25,9 +25,9 @@ const {
   getArtists,
   addFollower,
   removeFollower,
-} = userController
+} = userController;
 
-const { fetchAdminProducts } = productController
+const { fetchAdminProducts } = productController;
 
 const userRouter = Router();
 
@@ -39,7 +39,7 @@ userRouter.delete("/artists/unfollow/:id", removeFollower);
 userRouter.get("/wishlist", getUserWishlist);
 userRouter.post("/wishlist/add/:id", addToWishlist);
 userRouter.delete("/wishlist/remove/:id", removeFromWishlist);
-userRouter.post("/signin", passport.authenticate("local"), signinUser);
+userRouter.post("/signin", signInMiddleware, signinUser);
 
 userRouter.post("/create", createUser);
 userRouter.put("/update", checkAuth, updateUser);
@@ -52,7 +52,7 @@ userRouter.delete("/address/:id", checkAuth, deleteUserAddress);
 userRouter.post("/rv/add/:id", addToRV);
 
 userRouter.post("/social", addSocialMediaLink);
-userRouter.delete("/social/:id",checkAuth, removeSocialMediaLink);
+userRouter.delete("/social/:id", checkAuth, removeSocialMediaLink);
 
 userRouter.put("/address", updateUserAddress);
 userRouter.get("/:id", getUserById);
@@ -62,8 +62,7 @@ userRouter.get("/:id", getUserById);
 userRouter.use((err: any, req: any, res: any, next: any) => {
   if (err) {
     console.log("ERROR HANDLER USER ROUTER", err);
-
-    res.status(401).send(err)
+    res.json({error:err.message});
   }
 });
 

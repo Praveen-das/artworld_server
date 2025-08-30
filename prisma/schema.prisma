@@ -10,42 +10,51 @@ datasource db {
 }
 
 model User {
-  displayName    String
-  bio            String?
-  email          String?
-  phoneNumber    String?         @db.VarChar(10)
-  password       String?
-  photo          String?
-  provider       provider_type   @default(web)
-  createdAt      DateTime        @default(dbgenerated("NOW()"))
-  cart           cart_item[]
-  social         Social[]
-  linked_account linked_account?
-  role           user_role       @default(user)
-  id             String          @id @unique @default(uuid())
+  id               String             @id @unique @default(uuid())
+  displayName      String
+  bio              String?
+  email            String?
+  phoneNumber      String?            @db.VarChar(10)
+  password         String?
+  photo            String?
+  provider         provider_type      @default(web)
+  createdAt        DateTime           @default(dbgenerated("NOW()"))
+  cart             Cart?
+  social           Social[]
+  linked_account   linked_account?
+  role             user_role          @default(user)
+  onboardingStatus onboarding_status? @default(pending)
+  address          Address?
 
-  address            Address[] @relation("UserToHaveAddressCollection")
-  default_address    Address?  @relation("user_default_address", fields: [default_address_id], references: [id])
-  default_address_id String?   @unique
+  product         Product[]
+  wishlist        wishlist[]
+  reviews         Reviews[]
+  recently_viewed recently_viewed[]
+  Conversation    Conversation[]
+  Chat            Chat[]
+  followers       Followers[]       @relation("followers")
+  following       Followers[]       @relation("following")
+  cartId          String?
 
-  product                                     Product[]
-  wishlist                                    wishlist[]
-  reviews                                     Reviews[]
-  sales_order_personTosales_order_customer_id sales_order[]     @relation("personTosales_order_customer_id")
-  sales_order_personTosales_order_seller_id   sales_order[]     @relation("personTosales_order_seller_id")
-  recently_viewed                             recently_viewed[]
-  Conversation                                Conversation[]
-  Chat                                        Chat[]
-  followers                                   Followers[]       @relation("followers")
-  following                                   Followers[]       @relation("following")
+  order      Order[] @relation("order")
+  salesOrder Order[] @relation("salesOrder")
 
   @@unique([email, provider])
 }
 
+model token {
+  id        String   @id @unique @default(uuid())
+  userId    String   @unique
+  token     String
+  expiresAt DateTime @db.Timestamptz()
+}
+
 model linked_account {
-  id        String                @id @unique @default(uuid())
-  status    linked_account_status @default(not_active)
-  accountId String
+  id            String                @id @unique @default(uuid())
+  status        linked_account_status @default(created)
+  accountId     String
+  stakeholderId String?
+  productId     String?
 
   user   User   @relation(fields: [userId], references: [id])
   userId String @unique
@@ -80,20 +89,16 @@ model UserVerificationRecords {
 }
 
 model Address {
+  id        String   @id @default(uuid())
   name      String   @db.VarChar(60)
   address   String
   city      String   @db.VarChar(40)
   state     String   @db.VarChar(20)
   pincode   String   @db.VarChar(6)
-  createdAt DateTime @default(dbgenerated("NOW()"))
   mobile    String   @db.VarChar(10)
-  id        String   @id @default(uuid())
-
-  // userToHaveDefaultAddress    User   @relation("user_default_address", fields: [userId], references: [id])
-  // userIdForDefaultAddress     String @unique
-  UserToHaveAddressCollection User   @relation("UserToHaveAddressCollection", fields: [user_id], references: [id])
-  user_id                     String
-  User                        User[] @relation("user_default_address")
+  userId    String   @unique
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(dbgenerated("NOW()"))
 }
 
 //-----------------product schema-----------------//
@@ -101,27 +106,22 @@ model Address {
 model Product {
   name           String         @db.VarChar(50)
   desc           String
-  quantity       Int
   price          Int
   discount       Int
   images         Json[]
-  createdAt      DateTime       @default(dbgenerated("NOW()"))
-  modifiedAt     DateTime       @updatedAt
   widthInInches  Int
   heightInInches Int
   sellingOption  selling_option
   rating         Int?
   id             String         @id @default(uuid())
 
-  category     Category?    @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sub_category SubCategory? @relation(fields: [subCategory_id], references: [id])
-  subject      Subject?     @relation(fields: [subject_id], references: [id])
-  style        Style?       @relation(fields: [style_id], references: [id])
-  material     Material?    @relation(fields: [material_id], references: [id])
-  collections  Collections? @relation(fields: [collections_id], references: [id])
+  category    Category?    @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subject     Subject?     @relation(fields: [subject_id], references: [id])
+  style       Style?       @relation(fields: [style_id], references: [id])
+  material    Material?    @relation(fields: [material_id], references: [id])
+  collections Collections? @relation(fields: [collections_id], references: [id])
 
   category_id    Int?
-  subCategory_id Int?
   subject_id     Int?
   style_id       Int?
   material_id    Int?
@@ -133,25 +133,18 @@ model Product {
   cart_item       cart_item[]
   wishlist        wishlist[]
   recently_viewed recently_viewed[]
+  inventory       Inventory?
+  sales_order     sales_order[]
 
-  @@unique([name, desc])
+  createdAt  DateTime @default(dbgenerated("NOW()"))
+  modifiedAt DateTime @updatedAt
 }
 
 model Category {
   name String @unique @db.VarChar(30)
   id   Int    @id @default(autoincrement())
 
-  product      Product[]
-  sub_category SubCategory[]
-}
-
-model SubCategory {
-  name String @unique @db.VarChar(30)
-  id   Int    @id @default(autoincrement())
-
-  product     Product[]
-  Category    Category? @relation(fields: [category_id], references: [id])
-  category_id Int?
+  product Product[]
 }
 
 model Material {
@@ -183,6 +176,18 @@ model Collections {
 }
 
 //****************product schema****************//
+
+model Inventory {
+  id           String @id @unique @default(uuid())
+  availableQty Int
+  reservedQty  Int    @default(0)
+
+  Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String  @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 model Reviews {
   createdAt  DateTime @default(dbgenerated("NOW()"))
@@ -219,31 +224,80 @@ model recently_viewed {
   user_id    String
 }
 
-model cart_item {
-  createdAt DateTime @default(dbgenerated("NOW()"))
-  quantity  Int
-  price     Int
-  discount  Int      @default(0)
-  id        String   @id @default(uuid())
+model Cart {
+  id     String      @id @default(uuid())
+  userId String      @unique
+  items  cart_item[]
 
-  product     Product?      @relation(fields: [product_id], references: [id])
-  product_id  String
-  User        User?         @relation(fields: [user_id], references: [id])
-  user_id     String
-  sales_order sales_order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id])
+}
+
+model cart_item {
+  id         String  @id @default(uuid())
+  cartId     String?
+  product_id String
+  quantity   Int
+
+  Cart      Cart?    @relation(fields: [cartId], references: [id])
+  product   Product? @relation(fields: [product_id], references: [id])
+  createdAt DateTime @default(dbgenerated("NOW()"))
+}
+
+model Order {
+  id      String        @id @default(uuid())
+  status  order_status  @default(created)
+  items   sales_order[]
+  payment Payment?
+
+  user          User?   @relation(name: "order", fields: [userId], references: [id])
+  userId        String?
+  salesPerson   User?   @relation(name: "salesOrder", fields: [salesPersonId], references: [id])
+  salesPersonId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id String @id @default(uuid())
+
+  transfers Transfer[]
+  
+  order     Order      @relation(fields: [orderId], references: [id])
+  orderId   String     @unique
+
+  createdAt DateTime @default(now()) @db.Timestamptz()
+}
+
+model Transfer {
+  id String @id @default(uuid())
+
+  payment      Payment?     @relation(fields: [paymentId], references: [id])
+  paymentId    String
+  sales_order  sales_order? @relation(fields: [salesOrderId], references: [id])
+  salesOrderId String       @unique
+
+  createdAt DateTime @default(now()) @db.Timestamptz()
 }
 
 model sales_order {
-  timer_order_taken DateTime     @default(dbgenerated("NOW()"))
-  status            status_type? @default(pending)
-  cart_item_id      String
-  customer_id       String
-  seller_id         String
-  id                String       @id @default(uuid())
+  id                 String                 @id @default(uuid())
+  quantity           Int
+  price              Int
+  discount           Int
+  status             order_item_status_type @default(pending)
+  cancellationReason String?
 
-  cart_item                              cart_item @relation(fields: [cart_item_id], references: [id])
-  person_personTosales_order_customer_id User      @relation("personTosales_order_customer_id", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  person_personTosales_order_seller_id   User      @relation("personTosales_order_seller_id", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Transfer  Transfer?
+  product   Product?  @relation(fields: [productId], references: [id])
+  productId String
+  order     Order?    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+
+  createdAt DateTime @default(dbgenerated("NOW()"))
+  updatedAt DateTime @updatedAt
 }
 
 // ---------------MESSENGER------------------------------------------------------
@@ -278,14 +332,18 @@ enum selling_option {
 }
 
 enum linked_account_status {
-  not_active
-  active
-  inactive
+  created
+  suspended
 }
 
 enum user_role {
   user
   seller
+}
+
+enum onboarding_status {
+  pending
+  success
 }
 
 enum provider_type {
@@ -295,11 +353,15 @@ enum provider_type {
   twitter
 }
 
-enum status_type {
+enum order_status {
+  created
+  paid
+}
+
+enum order_item_status_type {
   pending
   shipped
-  completed
-  declined
-  refunded
+  delivered
   cancelled
+  refunded
 }

@@ -25,7 +25,7 @@ authRouter.get("/twitter", passport.authenticate("twitter"));
 
 authRouter.get(
   "/twitter/redirect",
-  passport.authenticate("twitter", { failureRedirect: "/login" }),
+  passport.authenticate("twitter", { failureRedirect: "/sign-in" }),
   function (req, res) {
     // Successful authentication, redirect home.
     res.redirect("/");

@@ -7,8 +7,8 @@ const imagekit = new ImageKit({
 });
 
 function _imageKitGetAuth(_: any, res: any) {
-  var result = imagekit.getAuthenticationParameters();
-  res.send(result);
+  var authParams = imagekit.getAuthenticationParameters();
+  res.send(authParams);
 }
 
 async function _deleteFile(req: any, res: any, next: any) {
@@ -17,17 +17,17 @@ async function _deleteFile(req: any, res: any, next: any) {
   let promises = ids?.map(async (id: string) => {
     return await new Promise((resolve, reject) => {
       imagekit.deleteFile(id, (error) => {
-        if (error) reject(error)
-        else resolve(true)
-      })
-    })
+        if (error) reject(error);
+        else resolve(true);
+      });
+    });
   });
 
   Promise.all(promises)
     .then((data) => {
-      res.send(data)
+      res.send(data);
     })
-    .catch((err) => console.log(err))
+    .catch((err) => console.log(err));
 }
 
 export { _imageKitGetAuth, _deleteFile };

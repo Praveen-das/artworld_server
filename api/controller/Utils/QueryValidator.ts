@@ -1,45 +1,54 @@
-import { object, number, string, array, lazy } from "yup";
+import { object, number, string, array, lazy, mixed } from "yup";
 
-let request = object({
-    p: number().default(1),
-    q: string(),
-    limit: number().default(10),
-    category: number(),
-    sub_category: array(string()),
-    subject: array(string()),
-    style: array(string()),
-    material: array(string()),
-    collection: number(),
-    rating: array(number()),
-    discount: array(number()),
-    price_range: object({ min: number(), max: number() }),
-    orderBy: lazy((obj) => {
-        let schema = null
-        Object.keys(obj || {})?.forEach(key => {
-            schema = object({ [key]: string() })
-        })
-        return schema || object({ createdAt: string().default('desc') })
-    })
-})
+const orderInput = ["createdAt_desc", "price_desc", "price_asc", "discount_desc", "discount_asc", "rating_desc"];
 
-export default function QueryValidator(qry: any) {    
+const orderBySchema = mixed().transform((value, originalValue) => {
+  if (typeof originalValue === "string" && orderInput.includes(originalValue)) {
+    const [key, order] = originalValue.split("_");
+    return { [key!]: order };
+  }
+  return undefined;
+});
 
-    for (let key in qry) {
-        let value = qry[key]
+let productRequest = object({
+  p: number().default(1),
+  q: string().transform((value) => {
+    const words = value.trim().split(/\s+/);
+    return words.length > 1 ? words.join(" & ") : value.trim();
+  }),
+  limit: number().default(10),
+  category: number(),
+  subject: array(string()),
+  style: array(string()),
+  material: array(string()),
+  collection: number(),
+  rating: array(number()),
+  discount: array(number()),
+  sellingOption: mixed().oneOf(["ORIGINAL", "PRINT"]),
+  price_range: object({ min: number(), max: number() }).default(undefined),
+  order: orderBySchema,
+});
 
-        if (key === 'q') {
-            qry[key] = qry[key].replace(' ', " & ")
-            continue
-        }
-        // if (key === 'category') continue
-        // if (key === 'collection') continue
-        if (typeof value === 'string')
-            qry[key] = JSON.parse(value)
-    }
+let salesOrderRequest = object({
+  p: number().default(1),
+  q: string().transform((value) => {
+    const words = value.trim().split(/\s+/);
+    return words.length > 1 ? words.join(" & ") : value.trim();
+  }),
+  limit: number().default(10),
+  sellingOption: mixed().oneOf(["ORIGINAL", "PRINT"]),
+  order: orderBySchema,
+  status: mixed().oneOf(["cancelled", "pending", "shipped", "delivered", "refunded"]),
+});
 
-    
-    let options = { stripUnknown: true }
-    const query = request.validateSync(qry, options);
+export function QueryValidator(qry: any) {
+  let options = { stripUnknown: true };
+  const query = productRequest.validateSync(qry, options);
+  return query;
+}
 
-    return query
+export function salesOrderQueryValidator(qry: any) {
+  let options = { stripUnknown: true };
+  const query = salesOrderRequest.validateSync(qry, options);
+  return query;
 }

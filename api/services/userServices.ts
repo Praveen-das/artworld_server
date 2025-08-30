@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import db from "../config/prismaClient";
 
 const _createUser = async (credentials: any) => {
@@ -6,13 +7,24 @@ const _createUser = async (credentials: any) => {
   });
 };
 
-const _getUserByEmail = async (email: string, provider: any = 'web') => {
+const _getUserByEmail = async (email: string, provider: any = "web") => {
   const data = await db.user.findFirst({
     where: { email, provider: provider },
     include: {
-      default_address: true,
-      address: { orderBy: { createdAt: 'desc' } },
-      social: true
+      address: true,
+      social: true,
+    },
+  });
+
+  return data;
+};
+
+const _getAdminByEmail = async (email: string, provider: any = "web") => {
+  const data = await db.user.findFirst({
+    where: { email, provider: provider },
+    include: {
+      address: true,
+      social: true,
     },
   });
 
@@ -20,11 +32,10 @@ const _getUserByEmail = async (email: string, provider: any = 'web') => {
 };
 
 const _getUserById = async (id: string) => {
-  const data: any = await db.user.findUnique({
+  const data = await db.user.findUnique({
     where: { id },
     include: {
-      default_address: true,
-      address: { orderBy: { createdAt: 'desc' } },
+      address: true,
       // recently_viewed: {
       //   orderBy: { createdAt: 'desc' },
       //   include: {
@@ -38,25 +49,24 @@ const _getUserById = async (id: string) => {
       //   }
       // },
       social: true,
-      sales_order_personTosales_order_customer_id: { include: { cart_item: { include: { product: true } } } },
       wishlist: { include: { product: true } },
-      cart: { include: { product: true } },
-      product: {
-        include: {
-          sales_person: true
-        }
-      },
+      // cart: { include: { product: true } },
+      // product: {
+      //   include: {
+      //     sales_person: true,
+      //   },
+      // },
       followers: true,
       following: true,
-      linked_account: true
+      linked_account: true,
     },
   });
 
   if (data) {
     data.social = data.social?.reduce((a: any, b: any) => {
-      a[b.name] = b
-      return a
-    }, {})
+      a[b.name] = b;
+      return a;
+    }, {});
   }
 
   return data;
@@ -71,9 +81,9 @@ const _updateUser = async (id: string, updates: any) => {
 };
 
 interface links {
-  uid: string,
-  name: string,
-  utl: string
+  uid: string;
+  name: string;
+  utl: string;
 }
 
 const _addSocialMediaLink = async (id: string, links: Array<links>) => {
@@ -82,24 +92,24 @@ const _addSocialMediaLink = async (id: string, links: Array<links>) => {
       let transaction = db.social.upsert({
         create: {
           ...link,
-          user_id: id
+          user_id: id,
         },
         update: link,
-        where: { user_id_name: { user_id: id, name: link.name } }
-      })
+        where: { user_id_name: { user_id: id, name: link.name } },
+      });
 
-      array.push(transaction)
+      array.push(transaction);
     }
 
-    return array
-  }, [])
+    return array;
+  }, []);
 
-  return await db.$transaction(data)
-}
+  return await db.$transaction(data);
+};
 
 const _removeSocialMediaLink = async (id: string) => {
-  return await db.social.delete({ where: { id } })
-}
+  return await db.social.delete({ where: { id } });
+};
 
 const _addUserAddress = async (address: any) => {
   return await db.address.create({ data: address });
@@ -121,7 +131,11 @@ const _addToWishlist = async (data: any) => {
 };
 
 const _getUserWishlist = async (user_id: string) => {
-  const res = await db.wishlist.findMany({ where: { user_id }, orderBy: { createdAt: 'desc' }, include: { product: true } });
+  const res = await db.wishlist.findMany({
+    where: { user_id },
+    orderBy: { createdAt: "desc" },
+    include: { product: true },
+  });
   return res;
 };
 
@@ -145,58 +159,56 @@ const _getArtists = async () => {
     id: true,
     email: true,
     social: true,
-    followers: true
-  }
+    followers: true,
+  };
 
   let data: any = await db.user.findMany({
     where: {
-      role: 'seller'
+      role: "seller",
     },
-    select: selectedItems
+    select: selectedItems,
   });
 
-  delete data.password
-  return data
-}
+  delete data.password;
+  return data;
+};
 
 interface AF {
-  userId: string,
-  followingUserId: string
+  userId: string;
+  followingUserId: string;
 }
 
 const _addFollower = (userId: string, followingUserId: string) => {
   return db.followers.create({
     data: {
       userId,
-      followingUserId
-    }
-  })
-}
+      followingUserId,
+    },
+  });
+};
 
 const _removeFollower = (id: string) => {
   return db.followers.delete({
-    where: { id }
-  })
-}
+    where: { id },
+  });
+};
 
 export {
   _createUser,
   _getUserByEmail,
+  _getAdminByEmail,
   _getUserById,
   _updateUser,
   _addUserAddress,
   _deleteUserAddress,
   _updateUserAddress,
-
   _addToWishlist,
   _getUserWishlist,
   _removeFromlist,
   _addToRV,
-
   _addSocialMediaLink,
   _removeSocialMediaLink,
-
   _getArtists,
   _addFollower,
-  _removeFollower
+  _removeFollower,
 };

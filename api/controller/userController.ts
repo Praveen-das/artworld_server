@@ -18,31 +18,30 @@ import {
 
 import bcrypt from "bcryptjs";
 import passport from "passport";
-import { sendOrderConfirmationMail } from "../services/nodeMailer";
 import { generateToken, verifyToken } from "../services/jwt";
 import { prismaErrorHandler } from "../utils/PrismaErrorHandler";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import ioredis from "../config/Redis";
-
-const hashPassword = async (password: string) => {
-  const salt = 12;
-  return await bcrypt.hash(password, salt);
-};
+import { hashPassword } from "../utils/password";
 
 const getUserById = async (req: any, res: any, next: any) => {
-  const id = req.params.id
+  const id = req.params.id;
 
   _getUserById(id)
     .then((data) => {
-      let isFollowed = data.followers.some((user: any) => user?.userId === req.user?.id)
-      data.isFollowedByCurrentUser = isFollowed
-      res.json(data)
+      if (data === null) return res.send(null);
+      else {
+        let isFollowed = data.followers.some((user) => user?.userId === req.user?.id);
+        // @ts-ignore
+        data.isFollowedByCurrentUser = isFollowed;
+        res.json(data);
+      }
     })
     .catch((err) => console.log(err));
-}
+};
 
 const createUser = async (req: any, res: any, next: any) => {
   const credentials = req.body;
+
+  if (!credentials) return res.send(400).json("Credentials not provided");
 
   const hashPass = await hashPassword(req.body.password);
 
@@ -50,19 +49,27 @@ const createUser = async (req: any, res: any, next: any) => {
 
   _createUser(credentials)
     .then((data) => res.json(data))
-    .catch((err) => {
-      prismaErrorHandler(err, next);
-      next(err);
-    });
+    .catch((err) => next(prismaErrorHandler(err)));
 };
 
 const signinUser = (req: any, res: any, next: any) => {
-  passport.authenticate("local", (err: any, user: any) => {
+  passport.authenticate("user-local", (err: any, user: any) => {
+    if (err) return res.status(404).json(err);
+    req.logIn(user, (err: any) => {
+      if (err) next(err);
+      else {
+        res.send(req.user);
+      }
+    });
+  })(req, res, next);
+};
+
+const signinAdmin = (req: any, res: any, next: any) => {
+  passport.authenticate("admin-local", (err: any, user: any) => {
     if (err) return next(err);
     req.logIn(user, (err: any) => {
       if (err) next(err);
       else {
-        console.log(res.getHeaders());
         res.send(req.user);
       }
     });
@@ -79,18 +86,15 @@ const logoutUser = (req: any, res: any, next: any) => {
 const updateUser = async (req: any, res: any, next: any) => {
   let updates = req.body;
 
-  if (updates.old_password) {
-    const isValid = await bcrypt.compare(
-      updates.old_password,
-      req.user.password
-    );
+  if (updates.c_password) {
+    const isValid = await bcrypt.compare(updates.c_password, req.user.password);
 
     if (isValid) {
-      delete updates.old_password;
+      delete updates.c_password;
       updates.password = await hashPassword(updates.password);
     } else {
       return next({
-        error: { field: "old_password", message: "Invalid password" },
+        error: { field: "c_password", message: "Invalid password" },
         code: 401,
       });
     }
@@ -98,10 +102,7 @@ const updateUser = async (req: any, res: any, next: any) => {
 
   _updateUser(req.user?.id, updates)
     .then((data) => res.status(200).json(data))
-    .catch((err) => {
-      prismaErrorHandler(err, next);
-      next(err);
-    });
+    .catch((err) => next(prismaErrorHandler(err)));
 };
 
 const sendEmailVerification = async (req: any, res: any, next: any) => {
@@ -132,115 +133,93 @@ const addUserAddress = async (req: any, res: any, next: any) => {
   const userId = req.user?.id;
   const address = req.body;
 
-  address["user_id"] = userId;
-
-  delete address.isDefault
+  address["userId"] = userId;
 
   _addUserAddress(address)
     .then(async (data: any) => {
-      _updateUser(userId, { default_address_id: data.id })
-      res.json(data)
+      console.log(data);
+      res.json(data);
     })
-    .catch((err) => {
-      console.log(err);
-
-      if (err instanceof PrismaClientKnownRequestError)
-        err = prismaErrorHandler(err, next)
-      res.status(err.code).send(err.error);
-    });
+    .catch((err) => next(prismaErrorHandler(err)));
 };
 
 const updateUserAddress = async (req: any, res: any, next: any) => {
   const { id, ...updates } = req.body;
 
-  try {
-    _updateUserAddress(id, updates)
-      .then((data) => res.json(data))
-      .catch((err) => {
-        if (err instanceof PrismaClientKnownRequestError)
-          err = prismaErrorHandler(err, next)
-        res.status(err.code).send(err.error);
-      });
-  } catch (error) {
-    next(error);
-  }
+  _updateUserAddress(id, updates)
+    .then((data) => res.json(data))
+    .catch((err) => next(prismaErrorHandler(err)));
 };
 
 const deleteUserAddress = async (req: any, res: any, next: any) => {
   const id = req.params.id;
 
-  try {
-    _deleteUserAddress(id)
-      .then((data) => {
-        const address = req.user.address
-        const newAddress = address.filter((o: any) => o.id !== data.id)
-        console.log(newAddress)
-        res.json(newAddress)
-      })
-      .catch((err) => {
-        if (err instanceof PrismaClientKnownRequestError)
-          return prismaErrorHandler(err, next);
-        next(err);
-      });
-  } catch (error) {
-    next(error);
-  }
+  _deleteUserAddress(id)
+    .then((data) => {
+      const address = req.user.address;
+      const newAddress = address.filter((o: any) => o.id !== data.id);
+      console.log(newAddress);
+      res.json(newAddress);
+    })
+    .catch((err) => next(prismaErrorHandler(err)));
 };
 
 const addToWishlist = (req: any, res: any, next: any) => {
-  const user_id = req.user?.id
-  const product_id = req.params.id
+  const user_id = req.user?.id;
+  const product_id = req.params.id;
+
+  console.log({ product_id });
 
   _addToWishlist({ user_id, product_id })
-    .then(data => res.json(data))
-    .catch(next)
-}
+    .then((data) => res.json(data))
+    .catch(next);
+};
 
 const removeFromWishlist = (req: any, res: any, next: any) => {
-  const id = req.params.id
-
+  const id = req.params.id;
+  console.log(id);
   _removeFromlist(id)
-    .then(data => res.json(data))
-    .catch(next)
-}
+    .then((data) => res.json(data))
+    .catch(next);
+};
 
 const getUserWishlist = (req: any, res: any, next: any) => {
-  const user_id = req.user?.id
-  if (!user_id) return res.json([])
+  const user_id = req.user?.id;
+  if (!user_id) return res.json([]);
   _getUserWishlist(user_id)
-    .then(data => res.json(data))
-    .catch(next)
-}
+    .then((data) => res.json(data))
+    .catch(next);
+};
 
 const addToRV = (req: any, res: any, next: any) => {
-  const user_id = req.user?.id
-  const product_id = req.params.id
+  const user_id = req.user?.id;
+  const product_id = req.params.id;
 
-  if (!user_id) return res.json([])
+  if (!user_id) return res.json([]);
 
   _addToRV({ user_id, product_id })
-    .then(data => res.json(data))
-    .catch(next)
-}
+    .then((data) => res.json(data))
+    .catch(next);
+};
 
 const addSocialMediaLink = (req: any, res: any, next: any) => {
-  const user_id = req.user?.id
-  const links = req.body
+  const user_id = req.user?.id;
+  const links = req.body;
 
-  if (!user_id) return res.json([])
+  if (!user_id) return res.json([]);
 
   _addSocialMediaLink(user_id, links)
-    .then(data => res.json(data))
-    .catch(next)
-}
+    .then((data) => res.json(data))
+    .catch(next);
+};
 
 const removeSocialMediaLink = (req: any, res: any, next: any) => {
-  const id = req.params.id
+  const id = req.params.id;
 
   _removeSocialMediaLink(id)
-    .then(data => res.json(data))
-    .catch(next)
-}
+    .then((data) => res.json(data))
+    .catch(next);
+};
 
 //atrists/////////////////////////////
 
@@ -248,28 +227,29 @@ const getArtists = async (req: any, res: any, next: any) => {
   _getArtists()
     .then((data) => res.json(data))
     .catch((err) => next(err));
-}
+};
 const addFollower = async (req: any, res: any, next: any) => {
-  const userId = req.user?.id
-  const followingUserId = req.params?.id
+  const userId = req.user?.id;
+  const followingUserId = req.params?.id;
 
   _addFollower(userId, followingUserId)
     .then((data: any) => res.json(data))
     .catch((err: any) => next(err));
-}
+};
 
 const removeFollower = async (req: any, res: any, next: any) => {
-  const id = req.params?.id
+  const id = req.params?.id;
 
   _removeFollower(id)
     .then((data: any) => res.json(data))
     .catch((err: any) => next(err));
-}
+};
 
 export default {
   getUserById,
   createUser,
   signinUser,
+  signinAdmin,
   logoutUser,
   sendEmailVerification,
   confirmVerification,
@@ -288,5 +268,5 @@ export default {
 
   getArtists,
   addFollower,
-  removeFollower
+  removeFollower,
 };

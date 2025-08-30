@@ -8,19 +8,20 @@ import {
   _fetchProductById,
   _fetchFilterParams,
   // _fetchCategories,
-  _fetchTopSellingProducts
+  _fetchTopSellingProducts,
 } from "../services/productServices";
-import QueryValidator from './Utils/QueryValidator'
+import { QueryValidator } from "./Utils/QueryValidator";
 
 const fetchProducts = (req: any, res: any, next: any) => {
-  let query = QueryValidator(req.query)
-
+  let query = QueryValidator(req.query);
+  
   _fetchProducts(query)
     .then((data) => res.send(data))
     .catch(next);
 };
+
 const fetchTopSellingProducts = (req: any, res: any, next: any) => {
-  let query = QueryValidator(req.query)
+  let query = QueryValidator(req.query);
 
   _fetchTopSellingProducts(query)
     .then((data) => res.send(data))
@@ -28,14 +29,14 @@ const fetchTopSellingProducts = (req: any, res: any, next: any) => {
 };
 
 const fetchFilterParams = (req: any, res: any, next: any) => {
-  let query = QueryValidator(req.query)
+  let query = QueryValidator(req.query);
 
   _fetchFilterParams(query)
     .then((data) => res.send(data))
     .catch(next);
 };
 
-// const fetchCategories = (req: any, res: any, next: any) => {  
+// const fetchCategories = (req: any, res: any, next: any) => {
 //   let query = QueryValidator(req.query)
 
 //   _fetchCategories(query)
@@ -44,11 +45,11 @@ const fetchFilterParams = (req: any, res: any, next: any) => {
 // };
 
 const fetchAdminProducts = (req: any, res: any, next: any) => {
-  let query = QueryValidator(req.query)
+  let query = QueryValidator(req.query);
 
-  const userId = req.user?.id || null
+  const userId = req.user?.id || null;
 
-  if (!userId) return res.send([])
+  if (!userId) return res.send([]);
 
   _fetchAdminProducts(userId, query)
     .then((data) => res.status(200).send(data))
@@ -57,7 +58,6 @@ const fetchAdminProducts = (req: any, res: any, next: any) => {
 
 const fetchProductById = (req: any, res: any, next: any) => {
   const id = req.params.id;
-
   _fetchProductById(id)
     .then((data) => res.status(200).send(data))
     .catch(next);
@@ -72,7 +72,6 @@ const searchProductByName = (req: any, res: any, next: any) => {
 
 const addProduct = async (req: any, res: any, next: any) => {
   const product = req.body;
-  product['sales_person_id'] = req.user?.id
 
   _addProduct(product)
     .then((data) => res.status(200).send(data))
@@ -106,5 +105,5 @@ export default {
   searchProductByName,
   fetchFilterParams,
   // fetchCategories,
-  fetchTopSellingProducts
+  fetchTopSellingProducts,
 };
