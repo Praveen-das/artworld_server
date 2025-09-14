@@ -14,7 +14,6 @@ import { QueryValidator } from "./Utils/QueryValidator";
 
 const fetchProducts = (req: any, res: any, next: any) => {
   let query = QueryValidator(req.query);
-  
   _fetchProducts(query)
     .then((data) => res.send(data))
     .catch(next);
@@ -71,9 +70,16 @@ const searchProductByName = (req: any, res: any, next: any) => {
 };
 
 const addProduct = async (req: any, res: any, next: any) => {
-  const product = req.body;
+  const { quantity, ...product } = req.body;
 
-  _addProduct(product)
+  _addProduct({
+    ...product,
+    inventory: {
+      create: {
+        availableQty: quantity,
+      },
+    },
+  })
     .then((data) => res.status(200).send(data))
     .catch(next);
 };

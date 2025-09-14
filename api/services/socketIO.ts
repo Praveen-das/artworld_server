@@ -17,7 +17,7 @@ interface chat_schema {
 
 const origin = [
     'https://artworld-nine.vercel.app',
-    'http://localhost:3000'
+    'http://localhost:5173'
 ]
 
 function initializeSocket(server: any) {

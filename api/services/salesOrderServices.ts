@@ -16,7 +16,7 @@ export async function _updateOrderById(orderId: string, data: Prisma.OrderUpdate
   return await db.order.update({
     where: { id: orderId },
     data,
-    include: { items: true },
+    include: { items: { include: { product: true } } },
   });
 }
 
@@ -53,7 +53,7 @@ export async function _getSalesOrderByUserId(id: string, query: ReturnType<typeo
   let { q, p, limit, status } = query;
 
   const page = Math.max(1, p);
-  
+
   const where: Prisma.sales_orderWhereInput = {
     status,
     order: { status: "paid", salesPersonId: id },
@@ -144,6 +144,7 @@ export async function _getOrdersByUserId(id: string) {
         },
       },
     },
+    orderBy: { createdAt: "desc" },
   });
 }
 
@@ -155,7 +156,7 @@ export async function _fetchOrdersById(id: string) {
 }
 
 export async function _fetchTransferBySalesOrderId(salesOrderId: string) {
-  return await db.transfer.findUnique({where: { salesOrderId }});
+  return await db.transfer.findUnique({ where: { salesOrderId } });
 }
 
 export async function _updateSalesOrder({ order_id, updates }: any) {
