@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { QueryValidator } from "../controller/Utils/QueryValidator";
 const db = new PrismaClient();
 
@@ -26,7 +26,7 @@ function getWhereParams(query: any) {
   let minRating = rating && Math.min(...rating);
   let minDiscount = discount && Math.min(...discount);
 
-  return {
+  const whereParams = {
     category: { id: category },
     collections: { id: collection },
     subject: { name: { in: subject } },
@@ -42,6 +42,8 @@ function getWhereParams(query: any) {
     name: { search: q },
     id: { search: q },
   };
+
+  return whereParams as Partial<typeof whereParams>;
 }
 
 const _fetchProducts = async ({ p, limit, order: orderBy, ...query }: any) => {
@@ -103,7 +105,7 @@ const _fetchFilterParams = async (query: any) => {
     db.product.aggregate({
       _min: { price: true },
       _max: { price: true },
-      where: { ...where, price: undefined },
+      where: undefined,
     }),
     //available categories
     db.product.findMany({
@@ -263,8 +265,8 @@ const _fetchProductById = async (id: string) => {
   return res;
 };
 
-const _addProduct = async (data: any) => {
-  const res = await db.product.createMany({ data });
+const _addProduct = async (data: Prisma.ProductCreateInput) => {
+  const res = await db.product.create({ data });
   return res;
 };
 

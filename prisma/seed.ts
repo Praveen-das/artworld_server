@@ -7,8 +7,6 @@ async function seed() {
   await prisma.style.deleteMany();
   await prisma.material.deleteMany();
   await prisma.collections.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.inventory.deleteMany();
 
   await prisma.$executeRaw`ALTER SEQUENCE "Category_id_seq" RESTART WITH 1;`;
   await prisma.$executeRaw`ALTER SEQUENCE "Subject_id_seq" RESTART WITH 1;`;
@@ -170,21 +168,6 @@ async function seed() {
     ],
   });
 
-  const dummy_products = await import("./dummy_products.json", { with: { type: "json" } }).then((res) => res.default);
-
-  const transactions = dummy_products.map(({ quantity, ...item }) => {
-    let inventory = {
-      create: {
-        availableQty: quantity,
-      },
-    };
-
-    return prisma.product.create({
-      data: { ...item, sales_person_id: "d4de5375-93a1-4968-9411-d67e2a118bce", inventory },
-      include: { inventory: true },
-    });
-  });
-
   // const res = await prisma.product.create({
   //   data: {
   //     name: "Artwork 2a7dbc",
@@ -218,8 +201,6 @@ async function seed() {
   //   },
   //   include: { inventory: true },
   // });
-
-  const res = await prisma.$transaction(transactions);
 }
 
 // const asd = async () => {

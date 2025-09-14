@@ -25,9 +25,9 @@ async function _deleteFile(req: any, res: any, next: any) {
 
   Promise.all(promises)
     .then((data) => {
-      res.send(data);
+      res.json({ data });
     })
-    .catch((err) => console.log(err));
+    .catch((error) => res.json({ error }));
 }
 
 export { _imageKitGetAuth, _deleteFile };

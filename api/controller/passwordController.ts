@@ -20,7 +20,7 @@ const _sendResetLink = async (req: Request, res: Response, next: NextFunction) =
 
     await tokenServices.saveToken(token, user.id);
 
-    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+    const resetLink = `http://localhost:5173/reset-password?token=${token}`;
 
     res.json({ userId: user?.id, resetLink });
   } catch (error) {

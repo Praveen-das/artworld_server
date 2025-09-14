@@ -181,7 +181,7 @@ async function verifyPurchase(req: Request & { user?: User }, res: Response, nex
 
         try {
           await Promise.all(items.map((order) => _consumeStock(order.productId, order.quantity)));
-          res.json({ status: "success" });
+          return res.json({ data:items });
         } catch (consumeError) {
           console.error("Error consuming stock:", consumeError);
           res.status(500).json({ error: "Failed to consume stock for one or more items." });
