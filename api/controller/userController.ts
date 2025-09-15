@@ -21,15 +21,16 @@ import passport from "passport";
 import { generateToken, verifyToken } from "../services/jwt";
 import { prismaErrorHandler } from "../utils/PrismaErrorHandler";
 import { hashPassword } from "../utils/password";
+import { QueryValidator } from "./Utils/QueryValidator";
 
 const getUserById = async (req: any, res: any, next: any) => {
   const id = req.params.id;
-
   _getUserById(id)
     .then((data) => {
       if (data === null) return res.send(null);
       else {
         let isFollowed = data.followers.some((user) => user?.userId === req.user?.id);
+        
         // @ts-ignore
         data.isFollowedByCurrentUser = isFollowed;
         res.json(data);

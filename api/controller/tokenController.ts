@@ -31,7 +31,7 @@ const _verifyToken = async (req: any, res: any, next: any) => {
       if (!savedToken) return res.status(401).json("Token not found");
       else if (data.payload.expired) {
         services.deleteToken(savedToken.id);
-        res.status(401).json("Token expired");
+        return res.status(401).json("Token expired");
       }
       res.json(true);
     }

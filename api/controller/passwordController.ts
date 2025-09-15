@@ -7,6 +7,7 @@ import { prismaErrorHandler } from "../utils/PrismaErrorHandler";
 import { hashPassword } from "../utils/password";
 import { VerifyToken } from "../interfaces/types";
 import bcrypt from "bcryptjs";
+import { sendPasswordResetLinkMail } from "../services/nodeMailer";
 
 const _sendResetLink = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -22,7 +23,8 @@ const _sendResetLink = async (req: Request, res: Response, next: NextFunction) =
 
     const resetLink = `http://localhost:5173/reset-password?token=${token}`;
 
-    res.json({ userId: user?.id, resetLink });
+    await sendPasswordResetLinkMail({ email: emailId, resetLink });
+    res.json({ status: "success" });
   } catch (error) {
     if (error instanceof Error) res.status(401).json({ error: error.message });
   }
@@ -84,7 +86,7 @@ const _changePassword = async (req: Request, res: Response, next: NextFunction) 
 
       if (password !== c_password) return res.status(400).json("Passwords does not match");
 
-      const user = await _getUserById(userId); 
+      const user = await _getUserById(userId);
 
       if (!user) return res.status(404).json("User does not exist");
 

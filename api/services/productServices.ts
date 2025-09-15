@@ -46,7 +46,7 @@ function getWhereParams(query: any) {
   return whereParams as Partial<typeof whereParams>;
 }
 
-const _fetchProducts = async ({ p, limit, order: orderBy, ...query }: any) => {
+const _fetchProducts = async ({ p, limit, order: orderBy, ...query }: ReturnType<typeof QueryValidator>) => {
   let where = getWhereParams(query);
 
   const data = await db.product.findMany({
@@ -224,7 +224,7 @@ const _fetchFilterParams = async (query: any) => {
 
 const _fetchAdminProducts = async (userId: string, query: ReturnType<typeof QueryValidator>) => {
   let { q, p, limit } = query;
-
+  console.log({q, p})
   const page = Math.max(1, p);
 
   const where = {

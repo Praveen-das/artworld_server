@@ -44,7 +44,7 @@ userRouter.post("/signin", signInMiddleware, signinUser);
 userRouter.post("/create", createUser);
 userRouter.put("/update", checkAuth, updateUser);
 userRouter.get("/logout", logoutUser);
-userRouter.get("/products", checkAuth, fetchAdminProducts);
+userRouter.get("/products/:id", fetchAdminProducts);
 
 userRouter.post("/address", addUserAddress);
 userRouter.delete("/address/:id", checkAuth, deleteUserAddress);

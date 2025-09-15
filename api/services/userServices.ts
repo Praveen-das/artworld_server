@@ -51,15 +51,14 @@ const _getUserById = async (id: string) => {
       social: true,
       wishlist: { include: { product: true } },
       // cart: { include: { product: true } },
-      // product: {
-      //   include: {
-      //     sales_person: true,
-      //   },
-      // },
       followers: true,
       following: true,
       linked_account: true,
     },
+
+    // skip: (p - 1) * limit,
+    // take: limit,
+    // orderBy,
   });
 
   if (data) {
