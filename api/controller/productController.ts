@@ -44,11 +44,9 @@ const fetchFilterParams = (req: any, res: any, next: any) => {
 // };
 
 const fetchAdminProducts = (req: any, res: any, next: any) => {
-  let query = QueryValidator(req.query);
-
-  const userId = req.user?.id || null;
-
+  const userId = req.params.id || null;
   if (!userId) return res.send([]);
+  let query = QueryValidator(req.query);
 
   _fetchAdminProducts(userId, query)
     .then((data) => res.status(200).send(data))
