@@ -1,6 +1,5 @@
-const allowedOrigins = [
-    'https://artworld-nine.vercel.app',
-    'http://localhost:5173'
-]
+import { CLIENT_URL } from "../../utils/urls"
+
+const allowedOrigins = [CLIENT_URL]
 
 export default allowedOrigins
