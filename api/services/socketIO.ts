@@ -1,4 +1,5 @@
 import { Server } from 'socket.io'
+import { CLIENT_URL } from '../utils/urls'
 
 let users: any = new Map()
 let store: any = new Map()
@@ -15,12 +16,10 @@ interface chat_schema {
     status: string,
 }
 
-const origin = [
-    'https://artworld-nine.vercel.app',
-    'http://localhost:5173'
-]
+const origin = [CLIENT_URL!]
 
 function initializeSocket(server: any) {
+    if(!origin) throw new Error('Client URL not provided')
     const io = new Server(server, {
         cors: { origin },
         connectionStateRecovery: {

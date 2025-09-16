@@ -8,6 +8,7 @@ import { hashPassword } from "../utils/password";
 import { VerifyToken } from "../interfaces/types";
 import bcrypt from "bcryptjs";
 import { sendPasswordResetLinkMail } from "../services/nodeMailer";
+import { CLIENT_URL } from "../utils/urls";
 
 const _sendResetLink = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -21,7 +22,7 @@ const _sendResetLink = async (req: Request, res: Response, next: NextFunction) =
 
     await tokenServices.saveToken(token, user.id);
 
-    const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+    const resetLink = `${CLIENT_URL}/reset-password?token=${token}`;
 
     await sendPasswordResetLinkMail({ email: emailId, resetLink });
     res.json({ status: "success" });
