@@ -4,6 +4,7 @@ import { PassportStatic } from "passport";
 import { googleStrategy } from "./Strategies/googleStrategy";
 import { facebookStrategy } from "./Strategies/facebookStrategy";
 import { adminLocalStrategy, userLocalStrategy } from "./Strategies/localStrategy";
+import { rememberMeStrategy } from "./Strategies/rememberMeStrategy";
 
 declare global {
   namespace Express {
@@ -32,7 +33,7 @@ const initializePassport = (passport: PassportStatic) => {
 
   passport.use("user-local", userLocalStrategy);
   passport.use("admin-local", adminLocalStrategy);
-  // passport.use(rememberMeStrategy);
+  passport.use("remember-me", rememberMeStrategy);
   passport.use(googleStrategy);
   passport.use(facebookStrategy);
 };

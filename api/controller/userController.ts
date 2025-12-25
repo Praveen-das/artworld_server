@@ -30,7 +30,7 @@ const getUserById = async (req: any, res: any, next: any) => {
       if (data === null) return res.send(null);
       else {
         let isFollowed = data.followers.some((user) => user?.userId === req.user?.id);
-        
+
         // @ts-ignore
         data.isFollowedByCurrentUser = isFollowed;
         res.json(data);
@@ -59,7 +59,14 @@ const signinUser = (req: any, res: any, next: any) => {
     req.logIn(user, (err: any) => {
       if (err) next(err);
       else {
-        res.send(req.user);
+        if (req.body.remember_me) {
+          generateToken({ userId: user.id }, "7d").then((token: string) => {
+            res.cookie("remember_me", token, { path: "/", httpOnly: true, maxAge: 604800000 }); // 7 days
+            res.send(req.user);
+          });
+        } else {
+          res.send(req.user);
+        }
       }
     });
   })(req, res, next);
@@ -80,6 +87,7 @@ const signinAdmin = (req: any, res: any, next: any) => {
 const logoutUser = (req: any, res: any, next: any) => {
   req.logout((err: any) => {
     if (err) return next(err);
+    res.clearCookie("remember_me");
     res.send("logout successfully");
   });
 };

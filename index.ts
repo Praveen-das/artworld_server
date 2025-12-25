@@ -24,6 +24,7 @@ import initializeSocket from "./api/services/socketIO";
 import { checkAuth } from "./api/middleware/authentication";
 import cookieParser from "cookie-parser";
 import initCronJob from "./api/config/cronJob";
+import rememberMeMiddleware from "./api/middleware/rememberMeMiddleware";
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(rememberMeMiddleware);
 // initCronJob();
 
 // /*----------->> ROUTERS <<-----------*/
