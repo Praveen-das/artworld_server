@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Address" ALTER COLUMN "createdAt" SET DATA TYPE TIMESTAMPTZ(3);
