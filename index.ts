@@ -1,7 +1,35 @@
 import express from "express";
 import cors from "cors";
-import session, { SessionOptions } from "express-session";
+import dotenv from "dotenv";
+dotenv.config();
+
 import path from "path";
+import fs from "fs";
+
+// Monkey-patch path.dirname to handle numeric module.id passed by ncc/webpack
+const originalDirname = path.dirname;
+(path as any).dirname = function (p: any) {
+  if (typeof p !== "string") {
+    return process.cwd();
+  }
+  return originalDirname(p);
+};
+
+// Locate query engine binary in bundled environments (e.g. ncc)
+const clientDir = path.join(__dirname, "client");
+if (fs.existsSync(clientDir)) {
+  try {
+    const files = fs.readdirSync(clientDir);
+    const engineFile = files.find((f) => f.includes("query_engine"));
+    if (engineFile) {
+      process.env.PRISMA_QUERY_ENGINE_LIBRARY = path.join(clientDir, engineFile);
+    }
+  } catch (err) {
+    console.error("Failed to dynamically resolve Prisma query engine path:", err);
+  }
+}
+
+import session, { SessionOptions } from "express-session";
 
 import corsOptions from "./api/config/cors/corsOptions";
 

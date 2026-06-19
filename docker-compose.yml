@@ -1,0 +1,49 @@
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrator
+    container_name: artworld-migrate
+    env_file:
+      - .env
+    restart: "no"
+    networks:
+      - internal
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: artworld-api
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - internal
+
+  caddy:
+    image: caddy:latest
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.artworld.rule=Host(`artworld.fn-cloud.space`)'
+      - 'traefik.http.routers.artworld.entrypoints=websecure'
+      - 'traefik.http.routers.artworld.tls=true'
+      - 'traefik.http.routers.artworld.tls.certresolver=cert-resolver'
+      - 'traefik.http.services.artworld.loadbalancer.server.port=80'
+      - 'traefik.docker.network=artworld-network'
+    networks:
+      - artworld-network
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+  artworld-network:
+    external: true
