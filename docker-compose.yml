@@ -1,17 +1,17 @@
 services:
-  migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: migrator
-    container_name: artworld-migrate
-    env_file:
-      - .env
-    restart: "no"
-    networks:
-      - internal
+  # migrate:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: migrator
+  #   container_name: artworld-migrate
+  #   env_file:
+  #     - .env
+  #   restart: "no"
+  #   networks:
+  #     - internal
 
-  api:
+  artworld-api:
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,13 +20,13 @@ services:
       - "3001:3001"
     env_file:
       - .env
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
+    # depends_on:
+    #   migrate:
+    #     condition: service_completed_successfully
     networks:
       - internal
 
-  caddy:
+  artworld-gateway:
     image: caddy:latest
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro

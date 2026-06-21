@@ -10,16 +10,16 @@ COPY . .
 RUN npm run build
 
 ## --- Migrator stage (runs prisma migrate deploy) ---
-FROM alpine:3.20 AS migrator
-RUN apk add --no-cache nodejs openssl
-WORKDIR /usr/src/app
+# FROM alpine:3.20 AS migrator
+# RUN apk add --no-cache nodejs openssl
+# WORKDIR /usr/src/app
 
-COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /usr/src/app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /usr/src/app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /usr/src/app/prisma ./prisma
+# COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
+# COPY --from=builder /usr/src/app/node_modules/@prisma ./node_modules/@prisma
+# COPY --from=builder /usr/src/app/node_modules/prisma ./node_modules/prisma
+# COPY --from=builder /usr/src/app/prisma ./prisma
 
-CMD ["node", "./node_modules/prisma/build/index.js", "migrate", "deploy"]
+# CMD ["node", "./node_modules/prisma/build/index.js", "migrate", "deploy"]
 
 ## --- Runner stage (app only) ---
 FROM alpine:3.20 AS runner
