@@ -5,7 +5,7 @@ export const googleStrategy = new GoogleStrategy(
   {
     clientID: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    callbackURL: "/auth/google/redirect",
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || "/auth/google/redirect",
   },
   async (_, __, profile, done) => {
     try {
@@ -29,5 +29,5 @@ export const googleStrategy = new GoogleStrategy(
     } catch (error) {
       console.log("error googleStrategy--->", error);
     }
-  }
+  },
 );
