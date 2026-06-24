@@ -62,13 +62,15 @@ initializePassport(passport);
 app.use("/", express.static(path.join(__dirname, "/public")));
 app.use(cors(corsOptions));
 
-const cookieOptions: any =
-  process.env.NODE_ENV === "production"
-    ? {
-        sameSite: "none",
-        secure: true,
-      }
-    : {};
+const isProduction =
+  process.env.NODE_ENV === "production" || !!process.env.CLIENT_URL;
+
+const cookieOptions: any = isProduction
+  ? {
+      sameSite: "none" as const,
+      secure: true,
+    }
+  : {};
 
 const sessionMW = session({
   secret: "keyboard cat",
