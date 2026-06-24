@@ -94,6 +94,26 @@ app.use(rememberMeMiddleware);
 
 app.use("/", root);
 app.get("/health", (_, res) => res.send("ok"));
+app.get("/debug/auth", (req: any, res: any) => {
+  res.json({
+    user: req.user || null,
+    sessionID: req.sessionID,
+    isAuthenticated: req.isAuthenticated(),
+    cookies: req.cookies,
+    signedCookies: req.signedCookies,
+    protocol: req.protocol,
+    secure: req.secure,
+    headers: {
+      origin: req.headers.origin,
+      "x-forwarded-proto": req.headers["x-forwarded-proto"],
+    },
+    env: {
+      CLIENT_URL: process.env.CLIENT_URL,
+      NODE_ENV: process.env.NODE_ENV,
+    },
+    cookieOptions,
+  });
+});
 app.use("/user", userRouter);
 app.use("/admin", adminRoute);
 app.use("/reviews", userReviews);
