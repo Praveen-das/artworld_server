@@ -17,8 +17,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: artworld-api
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     # depends_on:
     #   migrate:
     #     condition: service_completed_successfully
