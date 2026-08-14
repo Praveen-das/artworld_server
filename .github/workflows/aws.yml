@@ -7,7 +7,7 @@ on:
 env:
   AWS_REGION: ap-south-1
   ECR_REPOSITORY: artworld
-  IMAGE_TAG: ${{ github.sha }}
+  IMAGE_TAG: latest
 
 permissions:
   contents: read
@@ -47,7 +47,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /apps/artworld
+            cd apps/artworld
 
             export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
             export ECR_REPOSITORY=${{ env.ECR_REPOSITORY }}
