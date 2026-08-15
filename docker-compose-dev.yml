@@ -1,0 +1,32 @@
+services:
+  artworld-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: artworld-api
+    env_file:
+      - .env
+    networks:
+      - internal
+
+  artworld-gateway:
+    image: caddy:latest
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.artworld.rule=Host(`artworld.fn-cloud.space`)'
+      - 'traefik.http.routers.artworld.entrypoints=websecure'
+      - 'traefik.http.routers.artworld.tls=true'
+      - 'traefik.http.routers.artworld.tls.certresolver=cert-resolver'
+      - 'traefik.http.services.artworld.loadbalancer.server.port=80'
+      - 'traefik.docker.network=artworld-network'
+    networks:
+      - artworld-network
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+  artworld-network:
+    external: true

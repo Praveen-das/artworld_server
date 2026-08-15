@@ -5,11 +5,3 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: artworld-api
-    networks:
-      - internal
-
-networks:
-  internal:
-    driver: bridge
-  artworld-network:
-    external: true
